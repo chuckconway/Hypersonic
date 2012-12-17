@@ -62,16 +62,12 @@ By default, if a connection string is not set in code it will use the first conn
 
 **Auto Generating Parameters**
 
-Hypersonic can decompose and generate the parameters based on the names of the properties.
+Hypersonic can decompose and generate the parameters based on the names of the properties. 
 
-User user = new User {Id=1, Name="John Doe", Password="secret"};
+    User user = new User {Id=1, Name="John Doe", Password="secret"};
 
-//The 
-
-IDatabase database = new MsSqlDatabase();
-return database.NonQuery("User_Update", user);
-
-
+    IDatabase database = new MsSqlDatabase();
+    return database.NonQuery("User_Update", user);
 
 
 **Aliasing Property Names**
@@ -84,106 +80,114 @@ Not all properties will have the same name as their column counterparts, for pro
     /// </summary>
     /// <value>The user id.</value>
     [DataAlias(Alias = "UserId")]
-	public int Id { get; set; }
+    public int Id { get; set; }
   
 **Ignoring Parameters**
 
 Not all properties are meant to be populated in the database. For those properties that should be ignored when saving to the database there is an attribute. Simply annotate the property with ‘IgnoreParameter’ and the property and it’s value will not be extracted from the object.
 
 
-		/// <summary>
-		/// Gets or sets the comment count.
-		/// </summary>
-		/// <value>The comment count.</value>
-        [IgnoreParameter]
-		public int CommentCount { get; set; }
-Retrieve Single Value with AutoPopulate
+    /// <summary>
+    /// Gets or sets the comment count.
+    /// </summary>
+    /// <value>The comment count.</value>
+    [IgnoreParameter]
+    public int CommentCount { get; set; }
+    Retrieve Single Value with AutoPopulate
+
+    /// <summary>
+    /// Retrieves the by primary key.
+    /// </summary>
+    /// <param name="userId">The user id.</param>
+    /// <returns></returns>
+    public User RetrieveByPrimaryKey(int userId)
+    {
+        User user = database.Single("User_SelectByPrimaryKey", new { userId }, database.AutoPopulate<User>);
+        return user;
+    }
+    
+**Retrieving Multiple Values with AutoPopulate**
 
 
-		/// <summary>
-		/// Retrieves the by primary key.
-		/// </summary>
-		/// <param name="userId">The user id.</param>
-		/// <returns></returns>
-		public User RetrieveByPrimaryKey(int userId)
-		{
-			User user = database.PopulateItem("User_SelectByPrimaryKey", new { userId }, database.AutoPopulate<User>);
-			return user;
-		}
-Retrieving Multiple Values with AutoPopulate
+    /// <summary>
+    /// Retrieves the comments by user id.
+    /// </summary>
+    /// <param name="userId">The user id.</param>
+    /// <returns></returns>
+    public List<Comment> RetrieveCommentsByUserId(int userId)
+    {
+        return database.List("Comment_RetrieveCommentsByUserId", new { userId }, database.AutoPopulate<Comment>);
+    }
 
-
-		/// <summary>
-		/// Retrieves the comments by user id.
-		/// </summary>
-		/// <param name="userId">The user id.</param>
-		/// <returns></returns>
-		public List<Comment> RetrieveCommentsByUserId(int userId)
-		{
-			return database.PopulateCollection("Comment_RetrieveCommentsByUserId", new { userId }, database.AutoPopulate<Comment>);
-		}
-Manual Mapping
-
-Defining a Mapping
 
 Defining a method entails have one parameter of type INullableReader and the return type of the a single object type. Collections are not allowed.
 
 
-		/// <summary>
-		/// Populates the specified reader.
-		/// </summary>
-		/// <param name="reader">The reader.</param>
-		/// <returns></returns>
-		internal static User Populate(INullableReader reader)
-		{
-			User user = new User
-					  {
-						  Id = reader.GetInt32("UserId"),
-						  FirstName = reader.GetString("FirstName"),
-						  LastName = reader.GetString("LastName"),
-						  Password = reader.GetString("Password"),
-						  Email = reader.GetString("Email"),
-						  DisplayName = reader.GetString("DisplayName"),
-						  Deleted = reader.GetBoolean("Deleted"),
-						  Username = reader.GetString("Username"),
-						  AccountStatus = reader.GetString("AccountStatus").ParseEnum<AccountStatus>(),
-						  Settings = new UserSettings
-										 {
-											 EnableReceivingOfEmails = reader.GetBoolean("EnableReceivingOfEmails"),
-											 WebViewMaxHeight = reader.GetInt16("WebViewMaxHeight"),
-											 WebViewMaxWidth = reader.GetInt16("WebViewMaxWidth")
-										 }
+<pre>
+/// <summary>
+/// Populates the specified reader.
+/// </summary>
+/// <param name="reader">The reader.</param>
+/// <returns></returns>
+internal static User Populate(INullableReader reader)
+{
+User user = new User
+		  {
+			  Id = reader.GetInt32("UserId"),
+			  FirstName = reader.GetString("FirstName"),
+			  LastName = reader.GetString("LastName"),
+			  Password = reader.GetString("Password"),
+			  Email = reader.GetString("Email"),
+			  DisplayName = reader.GetString("DisplayName"),
+			  Deleted = reader.GetBoolean("Deleted"),
+			  Username = reader.GetString("Username"),
+			  AccountStatus = reader.GetString("AccountStatus").ParseEnum<AccountStatus>(),
+			  Settings = new UserSettings
+							 {
+								 EnableReceivingOfEmails = reader.GetBoolean("EnableReceivingOfEmails"),
+								 WebViewMaxHeight = reader.GetInt16("WebViewMaxHeight"),
+								 WebViewMaxWidth = reader.GetInt16("WebViewMaxWidth")
+							 }
 
-					  };
+		  };
 
-			return user;
-		}
-Using the Mapping
+return user;
+}
+</pre>		
+
+
+**Using the Mapping**
 
 Simply pass the Mapping Method, in this case it’s called ‘Populate’, into the last parameter of the Populate methods.
 
-
-		/// <summary>
-		/// Retrieves the user by username.
-		/// </summary>
-		/// <param name="username">The username.</param>
-		/// <returns></returns>
-		public User RetrieveUserByUsername(string username)
-		{
-			return database.PopulateItem("User_RetrieveByUsername", new { username }, Populate);
-		}
-Anonymous Types as Parameters
+<pre>
+/// <summary>
+/// Retrieves the user by username.
+/// </summary>
+/// <param name="username">The username.</param>
+/// <returns></returns>
+public User RetrieveUserByUsername(string username)
+{
+	return database.Single("User_RetrieveByUsername", new { username }, Populate);
+}
+</pre>		
+		
+**Anonymous Types as Parameters**
 
 Anonymous Types can be used to pass parameters. Below mediaId and userId are passed into the NonQuery method by using an Anonymous Type. This is can happen because Anonymous Types compile to a class.
 
 
-		/// <summary>
-		/// Delete a Media by the primary key
-		/// </summary>
-		/// <param name="mediaId">The media id.</param>
-		/// <param name="userId">The user id.</param>
-		/// <returns></returns>
-		public int Delete(int mediaId, int userId)
-		{
-			return database.NonQuery("Media_Delete", new{mediaId, userId});
-		}
+<pre>
+
+/// <summary>
+/// Delete a Media by the primary key
+/// </summary>
+/// <param name="mediaId">The media id.</param>
+/// <param name="userId">The user id.</param>
+/// <returns></returns>
+public int Delete(int mediaId, int userId)
+{
+	return database.NonQuery("Media_Delete", new{mediaId, userId});
+}
+</pre>
+
