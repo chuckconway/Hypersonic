@@ -12,7 +12,7 @@ Hypersonic is a convention base mapper. It handles data going both directions, t
 - .NET 4.0 Framework or better
 
 **Download**
-- <a href="http://download.chuckconway.com/Hypersonic 3.0.0.zip" title="Download the latest version of Hypersonic" >Hypersonic 3.0.0</a>
+- <a href="http://hypersonic.chuckconway.com/Hypersonic 3.0.0.zip" title="Download the latest version of Hypersonic" >Hypersonic 3.0.0</a>
 
 **Limitations**
 
