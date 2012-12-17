@@ -10,11 +10,11 @@ Hypersonic is a convention base mapper. It handles data going both directions, t
 
 **Limitations**
 
-Properties names must be unique across the class hierarchy.
-Multipule ResultSets are not supported.
-DataSets are not supported.
-DataTables are not supported, except for passing Table-Valued Parameters to SQL Server.
-Enums are converted to their numeric value, not to their string value.
+- Properties names must be unique across the class hierarchy.
+- Multipule ResultSets are not supported.
+- DataSets are not supported.
+- DataTables are not supported, except for passing Table-Valued Parameters to SQL Server.
+- Enums are converted to their numeric value, not to their string value.
 
 
 **Getting Started**
