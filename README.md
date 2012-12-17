@@ -23,12 +23,13 @@ Configure you connection string in the web.config.
 
 **Setting the Connection String**
 
-<connectionStrings>
-  	<clear/>
-		<add connectionString="Data Source=localhost;Initial Catalog=Development.ThePhotoProject;User Id=joe;Password=cat;" name="SqlServer" />
-</connectionStrings>
+<pre style='color:#000000;background:#ffffff;'><span style='color:#a65700; '>&lt;</span><span style='color:#5f5035; '>connectionStrings</span><span style='color:#a65700; '>></span>
+      <span style='color:#a65700; '>&lt;</span><span style='color:#5f5035; '>clear</span><span style='color:#a65700; '>/></span>
+        <span style='color:#a65700; '>&lt;</span><span style='color:#5f5035; '>add</span> <span style='color:#274796; '>connectionString</span><span style='color:#808030; '>=</span><span style='color:#0000e6; '>"</span><span style='color:#0000e6; '>Data Source=localhost;Initial Catalog=Development.ThePhotoProject;User Id=joe;Password=cat;</span><span style='color:#0000e6; '>"</span> <span style='color:#274796; '>name</span><span style='color:#808030; '>=</span><span style='color:#0000e6; '>"</span><span style='color:#0000e6; '>SqlServer</span><span style='color:#0000e6; '>"</span> <span style='color:#a65700; '>/></span>
+<span style='color:#a65700; '>&lt;/</span><span style='color:#5f5035; '>connectionStrings</span><span style='color:#a65700; '>></span>
+</pre>
 
-By default, if a connection string is not set in code it will use the first connection string in the configuration section. Many times default
+By default, if a connection string is not set in code it will use the first connection string in the configuration section. Many times default is set in a machine config. By using 'clear' it will clear out all connection strings set in the machine.config.
 
 
 **Capturing Out Parameters**
