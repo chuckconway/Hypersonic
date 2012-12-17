@@ -3,9 +3,13 @@ Hypersonic
 
 “Auto-Mapper for the database”
 
+
 Hypersonic is a lightweight data access framework for .Net. It makes working with ADO.Net and stored procedures a breeze.
 
 Hypersonic is a convention base mapper. It handles data going both directions, to and from the database. Going to the database, the property names must match the stored procedure parameters. Coming from the database the column names must match the property names.
+
+**Requirments**
+- .NET 4.0 Framework or better
 
 
 **Limitations**
