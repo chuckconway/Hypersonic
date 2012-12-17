@@ -34,7 +34,7 @@ By default, if a connection string is not set in code it will use the first conn
 
 **Capturing Out Parameters**
 
-
+<pre>
 			IDatabase database = new MsSqlDatabase();
 			
 			DbParameter outParameter = database.MakeParameter("@Identity", 0, ParameterDirection.Output);
@@ -56,6 +56,8 @@ By default, if a connection string is not set in code it will use the first conn
 			int userId = Convert.ToInt32(outParameter.Value);
 
 			return userId;
+			
+</pre>
 
 
 **Auto Generating Parameters**
