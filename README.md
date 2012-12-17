@@ -91,7 +91,7 @@ Not all properties are meant to be populated in the database. For those properti
     /// Gets or sets the comment count.
     /// </summary>
     /// <value>The comment count.</value>
-    [IgnoreParameter]
+    [Ignore]
     public int CommentCount { get; set; }
     Retrieve Single Value with AutoPopulate
 
