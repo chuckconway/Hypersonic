@@ -12,7 +12,6 @@ namespace Hypersonic.Core
         where TCommand : DbCommand, new()
         where TParameter : DbParameter, new()
     {
-        private string _key;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DatabaseBase&lt;TConnection, TCommand, TParameter&gt;" /> class.
@@ -20,12 +19,6 @@ namespace Hypersonic.Core
         /// <param name="settings">The settings.</param>
         protected DatabaseBase(HypersonicSettings settings)
         {
-            _key = settings.ConnectionStringName;
-            ConnectionString = settings.ConnectionStringName;
-            CommandType = settings.CommandType == HypersonicCommandType.StoredProcedures
-                ? CommandType.StoredProcedure
-                : CommandType.Text;
-
             Settings = settings;
 
         }
@@ -36,7 +29,6 @@ namespace Hypersonic.Core
         protected DatabaseBase()
         {
             Settings = new HypersonicSettings();
-            CommandType = CommandType.StoredProcedure;
         }
 
         public HypersonicSettings Settings { get; set; }
@@ -59,28 +51,12 @@ namespace Hypersonic.Core
         /// <typeparam name="T"></typeparam>
         /// <param name="reader">The reader.</param>
         /// <returns></returns>
-        public T AutoPopulate<T>(INullableReader reader) where T : class, new()
+        private T AutoPopulate<T>(IHypersonicDbReader reader) where T : class, new()
         {
             var discoveryService = new ObjectBuilder();
             var instance = discoveryService.HydrateType<T>(reader);
 
             return instance;
-        }
-        
-        /// <summary>
-        /// Gets or sets the type of the command.
-        /// </summary>
-        /// <value>The type of the command.</value>
-        public CommandType CommandType { get; set; }
-
-        /// <summary>
-        /// Gets or sets the key.
-        /// </summary>
-        /// <value>The key.</value>
-        public string ConnectionStringName
-        {
-            get { return _key; }
-            set { _key = value; }
         }
 
         /// <summary>
@@ -92,42 +68,35 @@ namespace Hypersonic.Core
             get { return "@"; }
         }
 
-        /// <summary>
-        /// Gets or sets the connection string.
-        /// </summary>
-        /// <value>
-        /// The connection string.
-        /// </value>
-        public string ConnectionString { get; set; }
 
-        /// <summary>
-        /// Begins the transaction.
-        /// </summary>
-        /// <returns></returns>
-        public IDbTransaction BeginTransaction()
-        {
-            DbService<TConnection, TCommand> dbService = GetDbService();
-            DbConnection dbConnection = dbService.GetConnection(_key, ConnectionString);
+        ///// <summary>
+        ///// Begins the transaction.
+        ///// </summary>
+        ///// <returns></returns>
+        //public IDbTransaction BeginTransaction()
+        //{
+        //    DbService<TConnection, TCommand> dbService = GetDbService();
+        //    DbConnection dbConnection = dbService.GetConnection(_key, ConnectionString);
 
-            dbConnection.Open();
-            return dbConnection.BeginTransaction();
-        }
+        //    dbConnection.Open();
+        //    return dbConnection.BeginTransaction();
+        //}
 
-        /// <summary>
-        /// Begins the transaction.
-        /// </summary>
-        /// <param name="isolationLevel">The isolation level.</param>
-        /// <returns></returns>
-        public IDbTransaction BeginTransaction(IsolationLevel isolationLevel)
-        {
-            DbService<TConnection, TCommand> dbService = GetDbService();
-            DbConnection dbConnection = dbService.GetConnection(_key, ConnectionString);
+        ///// <summary>
+        ///// Begins the transaction.
+        ///// </summary>
+        ///// <param name="isolationLevel">The isolation level.</param>
+        ///// <returns></returns>
+        //public IDbTransaction BeginTransaction(IsolationLevel isolationLevel)
+        //{
+        //    DbService<TConnection, TCommand> dbService = GetDbService();
+        //    DbConnection dbConnection = dbService.GetConnection(_key, ConnectionString);
 
-            dbConnection.Open();
-            DbTransaction beginTransaction = dbConnection.BeginTransaction(isolationLevel);
-            IDbTransaction transaction = beginTransaction;
-            return transaction;
-        }
+        //    dbConnection.Open();
+        //    DbTransaction beginTransaction = dbConnection.BeginTransaction(isolationLevel);
+        //    IDbTransaction transaction = beginTransaction;
+        //    return transaction;
+        //}
 
         /// <summary>
         /// Gets the db service.
@@ -146,19 +115,7 @@ namespace Hypersonic.Core
         /// <returns></returns>
         public T Scalar<T>(string cmdText)
         {
-            return Scalar<T>(cmdText, new List<DbParameter>(), null);
-        }
-
-        /// <summary>
-        /// Scalars the specified CMD text.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="cmdText">The CMD text.</param>
-        /// <param name="transaction">The transaction.</param>
-        /// <returns></returns>
-        public T Scalar<T>(string cmdText, IDbTransaction transaction)
-        {
-            return Scalar<T>(cmdText, new List<DbParameter>(), transaction);
+            return Scalar<T>(cmdText, new List<DbParameter>());
         }
 
         /// <summary>
@@ -177,20 +134,6 @@ namespace Hypersonic.Core
         /// <summary>
         /// Scalars the specified CMD text.
         /// </summary>
-        /// <typeparam name="TN"></typeparam>
-        /// <param name="cmdText">The CMD text.</param>
-        /// <param name="parameters">The parameters.</param>
-        /// <param name="transaction">The transaction.</param>
-        /// <returns></returns>
-        public object Scalar<TN>(string cmdText, TN parameters, IDbTransaction transaction) where TN : class
-        {
-            List<DbParameter> dbParameters = GetValuesFromType(parameters);
-            return Scalar<object>(cmdText, dbParameters, transaction);
-        }
-
-        /// <summary>
-        /// Scalars the specified CMD text.
-        /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="cmdText">The CMD text.</param>
         /// <param name="parameters">The parameters.</param>
@@ -198,27 +141,12 @@ namespace Hypersonic.Core
         public T Scalar<T>(string cmdText, List<DbParameter> parameters)
         {
             DbService<TConnection, TCommand> dbService = GetDbService();
-            dbService.ConnectionStringName = _key;
+            //dbService.ConnectionStringName = _key;
 
-            return dbService.Scalar<T>(cmdText, parameters, null);
+            return dbService.Scalar<T>(cmdText, parameters);
         }
 
-        /// <summary>
-        /// Scalars the specified CMD text.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="cmdText">The CMD text.</param>
-        /// <param name="parameters">The parameters.</param>
-        /// <param name="transaction">The transaction.</param>
-        /// <returns></returns>
-        public T Scalar<T>(string cmdText, List<DbParameter> parameters, IDbTransaction transaction)
-        {
-            DbService<TConnection, TCommand> dbService = GetDbService();
-            dbService.ConnectionStringName = _key;
-
-            return dbService.Scalar<T>(cmdText, parameters, transaction);
-        }
-        
+       
         /// <summary>
         /// Returns reader from database call. **!# MUST be CLOSED and DISPOSED! Suggest using a "using" block
         /// </summary>
@@ -226,18 +154,7 @@ namespace Hypersonic.Core
         /// <returns>Result Set from procedure execution</returns>
         public DbDataReader Reader(string storedProcedure)
         {
-            return Reader(storedProcedure, new List<DbParameter>(), null);
-        }
-
-        /// <summary>
-        /// Returns reader from database call. **!# MUST be CLOSED and DISPOSED! Suggest using a "using" block
-        /// </summary>
-        /// <param name="storedProcedure">Procedure to be executed</param>
-        /// <param name="transaction">The transaction.</param>
-        /// <returns>Result Set from procedure execution</returns>
-        public DbDataReader Reader(string storedProcedure, IDbTransaction transaction)
-        {
-            return Reader(storedProcedure, new List<DbParameter>(), transaction);
+            return Reader(storedProcedure, new List<DbParameter>());
         }
 
         /// <summary>
@@ -249,21 +166,7 @@ namespace Hypersonic.Core
         public DbDataReader Reader<TN>(string storedProcedure, TN parameters) where TN : class
         {
             List<DbParameter> dbParameters = GetValuesFromType(parameters);
-            return Reader(storedProcedure, dbParameters, null);
-        }
-
-        /// <summary>
-        /// Returns reader from database call. **!# MUST be CLOSED and DISPOSED! Suggest using a "using" block
-        /// </summary>
-        /// <typeparam name="TN"></typeparam>
-        /// <param name="storedProcedure">Procedure to be executed</param>
-        /// <param name="parameters">The parameters.</param>
-        /// <param name="transaction">The transaction.</param>
-        /// <returns>Result Set from procedure execution</returns>
-        public DbDataReader Reader<TN>(string storedProcedure, TN parameters, IDbTransaction transaction) where TN : class
-        {
-            List<DbParameter> dbParameters = GetValuesFromType(parameters);
-            return Reader(storedProcedure, dbParameters, transaction);
+            return Reader(storedProcedure, dbParameters);
         }
 
         /// <summary>
@@ -275,25 +178,8 @@ namespace Hypersonic.Core
         public DbDataReader Reader(string storedProcedure, List<DbParameter> parameters)
         {
             DbService<TConnection, TCommand> dbService = GetDbService();
-            dbService.ConnectionStringName = _key;
 
-            DbDataReader dbDataReader = dbService.Reader(storedProcedure, parameters, null);
-            return dbDataReader;
-        }
-
-        /// <summary>
-        /// Returns reader from database call. **!# MUST be CLOSED and DISPOSED! Suggest using a "using" block
-        /// </summary>
-        /// <param name="storedProcedure">Procedure to be executed</param>
-        /// <param name="parameters">The parameters.</param>
-        /// <param name="transaction">The transaction.</param>
-        /// <returns>Result Set from procedure execution</returns>
-        public DbDataReader Reader(string storedProcedure, List<DbParameter> parameters, IDbTransaction transaction)
-        {
-            DbService<TConnection, TCommand> dbService = GetDbService();
-            dbService.ConnectionStringName = _key;
-
-            DbDataReader dbDataReader = dbService.Reader(storedProcedure, parameters, transaction);
+            DbDataReader dbDataReader = dbService.Reader(storedProcedure, parameters);
             return dbDataReader;
         }
 
@@ -302,13 +188,12 @@ namespace Hypersonic.Core
         /// </summary>
         /// <param name="storedProcedure">The stored procedure.</param>
         /// <returns></returns>
-        public NullableDataReader NullableReader(string storedProcedure)
+        public HypersonicDbDataReader NullableReader(string storedProcedure)
         {
             DbService<TConnection, TCommand> dbService = GetDbService();
-            dbService.ConnectionStringName = _key;
 
-            NullableDataReader nullableDataReader = dbService.NullableReader(storedProcedure, new List<DbParameter>(), null);
-            return nullableDataReader;
+            HypersonicDbDataReader hypersonicDbDataReader = dbService.NullableReader(storedProcedure, new List<DbParameter>());
+            return hypersonicDbDataReader;
         }
 
         /// <summary>
@@ -317,13 +202,12 @@ namespace Hypersonic.Core
         /// <param name="storedProcedure">The stored procedure.</param>
         /// <param name="transaction">The transaction.</param>
         /// <returns></returns>
-        public NullableDataReader NullableReader(string storedProcedure, IDbTransaction transaction)
+        public HypersonicDbDataReader NullableReader(string storedProcedure, IDbTransaction transaction)
         {
             DbService<TConnection, TCommand> dbService = GetDbService();
-            dbService.ConnectionStringName = _key;
 
-            NullableDataReader nullableDataReader = dbService.NullableReader(storedProcedure, new List<DbParameter>(), transaction);
-            return nullableDataReader;
+            HypersonicDbDataReader hypersonicDbDataReader = dbService.NullableReader(storedProcedure, new List<DbParameter>());
+            return hypersonicDbDataReader;
         }
 
         /// <summary>
@@ -332,33 +216,15 @@ namespace Hypersonic.Core
         /// <param name="storedProcedure">The stored procedure.</param>
         /// <param name="parameters">The parameters.</param>
         /// <returns></returns>
-        public NullableDataReader NullableReader<TN>(string storedProcedure, TN parameters) where TN : class
+        public HypersonicDbDataReader NullableReader<TN>(string storedProcedure, TN parameters) where TN : class
         {
             List<DbParameter> dbParameters = GetValuesFromType(parameters);
             DbService<TConnection, TCommand> dbService = GetDbService();
-            dbService.ConnectionStringName = _key;
 
-            NullableDataReader nullableDataReader = dbService.NullableReader(storedProcedure, dbParameters, null);
-            return nullableDataReader;
+            HypersonicDbDataReader hypersonicDbDataReader = dbService.NullableReader(storedProcedure, dbParameters);
+            return hypersonicDbDataReader;
         }
 
-        /// <summary>
-        /// Populate and returns the NullableReader.
-        /// </summary>
-        /// <typeparam name="TN"></typeparam>
-        /// <param name="storedProcedure">The stored procedure.</param>
-        /// <param name="parameters">The parameters.</param>
-        /// <param name="transaction">The transaction.</param>
-        /// <returns></returns>
-        public NullableDataReader NullableReader<TN>(string storedProcedure, TN parameters, IDbTransaction transaction) where TN : class
-        {
-            List<DbParameter> dbParameters = GetValuesFromType(parameters);
-            DbService<TConnection, TCommand> dbService = GetDbService();
-            dbService.ConnectionStringName = _key;
-
-            NullableDataReader nullableDataReader = dbService.NullableReader(storedProcedure, dbParameters, transaction);
-            return nullableDataReader;
-        }
 
         /// <summary>
         /// Nullables the reader.
@@ -366,29 +232,12 @@ namespace Hypersonic.Core
         /// <param name="storedProcedure">The stored procedure.</param>
         /// <param name="parameters">The parameters.</param>
         /// <returns></returns>
-        public NullableDataReader NullableReader(string storedProcedure, List<DbParameter> parameters)
+        public HypersonicDbDataReader NullableReader(string storedProcedure, List<DbParameter> parameters)
         {
             DbService<TConnection, TCommand> dbService = GetDbService();
-            dbService.ConnectionStringName = _key;
 
-            NullableDataReader nullableDataReader = dbService.NullableReader(storedProcedure, parameters, null);
-            return nullableDataReader;
-        }
-
-        /// <summary>
-        /// Nullables the reader.
-        /// </summary>
-        /// <param name="storedProcedure">The stored procedure.</param>
-        /// <param name="parameters">The parameters.</param>
-        /// <param name="transaction">The transaction.</param>
-        /// <returns></returns>
-        public NullableDataReader NullableReader(string storedProcedure, List<DbParameter> parameters, IDbTransaction transaction)
-        {
-            DbService<TConnection, TCommand> dbService = GetDbService();
-            dbService.ConnectionStringName = _key;
-
-            NullableDataReader nullableDataReader = dbService.NullableReader(storedProcedure, parameters, transaction);
-            return nullableDataReader;
+            HypersonicDbDataReader hypersonicDbDataReader = dbService.NullableReader(storedProcedure, parameters);
+            return hypersonicDbDataReader;
         }
 
         /// <summary>
@@ -398,18 +247,7 @@ namespace Hypersonic.Core
         /// <returns>rows affected</returns>
         public int NonQuery(string storedProc)
         {
-            return NonQuery(storedProc, new List<DbParameter>(), null);
-        }
-
-        /// <summary>
-        /// Executes the procedure
-        /// </summary>
-        /// <param name="storedProc">name of stored procedure</param>
-        /// <param name="transaction">The transaction.</param>
-        /// <returns>rows affected</returns>
-        public int NonQuery(string storedProc, IDbTransaction transaction)
-        {
-            return NonQuery(storedProc, new List<DbParameter>(), transaction);
+            return NonQuery(storedProc, new List<DbParameter>());
         }
 
         /// <summary>
@@ -421,24 +259,8 @@ namespace Hypersonic.Core
         public int NonQuery(string storedProc, List<DbParameter> parameters)
         {
             DbService<TConnection, TCommand> dbService = GetDbService();
-            dbService.ConnectionStringName = _key;
 
-            return dbService.NonQuery(storedProc, parameters, null);
-        }
-
-        /// <summary>
-        /// Executes the procedure and passes the parameters to the stored procedure
-        /// </summary>
-        /// <param name="storedProc">name of the stored procedure to be executed</param>
-        /// <param name="parameters">The parameters.</param>
-        /// <param name="transaction">The transaction.</param>
-        /// <returns>rows affected</returns>
-        public int NonQuery(string storedProc, List<DbParameter> parameters, IDbTransaction transaction)
-        {
-            DbService<TConnection, TCommand> dbService = GetDbService();
-            dbService.ConnectionStringName = _key;
-
-            return dbService.NonQuery(storedProc, parameters, transaction);
+            return dbService.NonQuery(storedProc, parameters);
         }
 
         /// <summary>
@@ -451,21 +273,7 @@ namespace Hypersonic.Core
         public int NonQuery<TN>(string storedProc, TN parameters) where TN : class
         {
             List<DbParameter> dbParameters = GetValuesFromType(parameters);
-            return NonQuery(storedProc, dbParameters, null);
-        }
-
-        /// <summary>
-        /// Executes the procedure and passes the parameters to the stored procedure.
-        /// </summary>
-        /// <typeparam name="TN"></typeparam>
-        /// <param name="storedProc">The stored proc.</param>
-        /// <param name="parameters">The parameters.</param>
-        /// <param name="transaction">The transaction.</param>
-        /// <returns></returns>
-        public int NonQuery<TN>(string storedProc, TN parameters, IDbTransaction transaction) where TN : class
-        {
-            List<DbParameter> dbParameters = GetValuesFromType(parameters);
-            return NonQuery(storedProc, dbParameters, transaction);
+            return NonQuery(storedProc, dbParameters);
         }
 
         /// <summary>
@@ -481,19 +289,19 @@ namespace Hypersonic.Core
             return parameter;
         }
 
-        /// <summary>
-        /// Makes the parameter.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="parameterName">Name of the parameter.</param>
-        /// <param name="value">The value.</param>
-        /// <param name="parameterDirection">The parameter direction.</param>
-        /// <returns></returns>
-        public DbParameter MakeParameter<T>(string parameterName, T value, ParameterDirection parameterDirection)
-        {
-            DbParameter parameter = new TParameter {ParameterName = parameterName, Value = value, Direction = parameterDirection};
-            return parameter;
-        }
+        ///// <summary>
+        ///// Makes the parameter.
+        ///// </summary>
+        ///// <typeparam name="T"></typeparam>
+        ///// <param name="parameterName">Name of the parameter.</param>
+        ///// <param name="value">The value.</param>
+        ///// <param name="parameterDirection">The parameter direction.</param>
+        ///// <returns></returns>
+        //private DbParameter MakeParameter<T>(string parameterName, T value, ParameterDirection parameterDirection)
+        //{
+        //    DbParameter parameter = new TParameter {ParameterName = parameterName, Value = value, Direction = parameterDirection};
+        //    return parameter;
+        //}
         
         /// <summary>
         /// Makes the parameter
@@ -534,38 +342,11 @@ namespace Hypersonic.Core
         /// <summary> Populates the collection. </summary>
         /// <typeparam name="T"> . </typeparam>
         /// <param name="storedProcedure"> The stored procedure. </param>
-        /// <param name="parameters">      The parameters. </param>
-        /// <param name="getItem">         The get item. </param>
-        /// <param name="transaction">     The transaction. </param>
-        /// <returns> A list of. </returns>
-        public IList<T> List<T>(string storedProcedure, List<DbParameter> parameters, Func<INullableReader, T> getItem, IDbTransaction transaction)
-        {
-            DbService<TConnection, TCommand> dbService = GetDbService();
-            dbService.ConnectionStringName = _key;
-
-            List<T> populateCollection = dbService.PopulateCollection(storedProcedure, parameters, getItem, transaction);
-            return populateCollection;
-        }
-
-        /// <summary> Populates the collection. </summary>
-        /// <typeparam name="T"> . </typeparam>
-        /// <param name="storedProcedure"> The stored procedure. </param>
         /// <param name="getItem">         The get item. </param>
         /// <returns> A list of. </returns>
-        public IList<T> List<T>(string storedProcedure, Func<INullableReader, T> getItem)
+        public IList<T> List<T>(string storedProcedure, Func<IHypersonicDbReader, T> getItem)
         {
             return List(storedProcedure, new List<DbParameter>(), getItem);
-        }
-
-        /// <summary> Populates the collection. </summary>
-        /// <typeparam name="T"> . </typeparam>
-        /// <param name="storedProcedure"> The stored procedure. </param>
-        /// <param name="getItem">         The get item. </param>
-        /// <param name="transaction">     The transaction. </param>
-        /// <returns> A list of. </returns>
-        public IList<T> List<T>(string storedProcedure, Func<INullableReader, T> getItem, IDbTransaction transaction)
-        {
-            return List(storedProcedure, new List<DbParameter>(), getItem, transaction);
         }
 
         /// <summary> Lists. </summary>
@@ -575,10 +356,10 @@ namespace Hypersonic.Core
         /// <param name="parameters">      The parameters. </param>
         /// <param name="getItem">         The get item. </param>
         /// <returns> A list of. </returns>
-        public IList<TReturn> List<TReturn, TN>(string storedProcedure, TN parameters, Func<INullableReader, TReturn> getItem) where TN : class
+        public IList<TReturn> List<TReturn, TN>(string storedProcedure, TN parameters, Func<IHypersonicDbReader, TReturn> getItem) where TN : class
         {
             List<DbParameter> dbParameters = GetValuesFromType(parameters);
-            return List(storedProcedure, dbParameters, getItem, null);
+            return List(storedProcedure, dbParameters, getItem);
         }
 
         /// <summary> Lists. </summary>
@@ -590,7 +371,7 @@ namespace Hypersonic.Core
         public IList<TReturn> List<TReturn, TN>(string storedProcedure, TN parameters) where TN : class where TReturn : class, new()
         {
             List<DbParameter> dbParameters = GetValuesFromType(parameters);
-            return List(storedProcedure, dbParameters, AutoPopulate<TReturn>, null);
+            return List(storedProcedure, dbParameters, AutoPopulate<TReturn>);
         }
 
         /// <summary>
@@ -606,7 +387,7 @@ namespace Hypersonic.Core
             where TReturn : class, new()
         {
             List<DbParameter> dbParameters = GetValuesFromType(parameters);
-            return Single(storedProcedure, dbParameters, AutoPopulate<TReturn>, null);
+            return Single(storedProcedure, dbParameters, AutoPopulate<TReturn>);
         }
 
         /// <summary> Lists. </summary>
@@ -615,7 +396,7 @@ namespace Hypersonic.Core
         /// <returns> A list of. </returns>
         public IList<TReturn> List<TReturn>(string storedProcedure) where TReturn : class, new()
         {
-            return List(storedProcedure, AutoPopulate<TReturn>, null);
+            return List(storedProcedure, AutoPopulate<TReturn>);
         }
 
         /// <summary>
@@ -626,22 +407,9 @@ namespace Hypersonic.Core
         /// <returns>``0.</returns>
         public TReturn Single<TReturn>(string storedProcedure) where TReturn : class, new()
         {
-            return Single(storedProcedure, AutoPopulate<TReturn>, null);
+            return Single(storedProcedure, AutoPopulate<TReturn>);
         }
 
-        /// <summary> Lists. </summary>
-        /// <typeparam name="T">  Generic type parameter. </typeparam>
-        /// <typeparam name="TN"> Type of the tn. </typeparam>
-        /// <param name="storedProcedure"> The stored procedure. </param>
-        /// <param name="parameters">      The parameters. </param>
-        /// <param name="getItem">         The get item. </param>
-        /// <param name="transaction">     The transaction. </param>
-        /// <returns> A list of. </returns>
-        public IList<T> List<T, TN>(string storedProcedure, TN parameters, Func<INullableReader, T> getItem, IDbTransaction transaction) where TN : class
-        {
-            List<DbParameter> dbParameters = GetValuesFromType(parameters);
-            return List(storedProcedure, dbParameters, getItem, transaction);
-        }
 
         /// <summary> Populates the collection. </summary>
         /// <typeparam name="T"> . </typeparam>
@@ -649,12 +417,11 @@ namespace Hypersonic.Core
         /// <param name="parameters">      The parameters. </param>
         /// <param name="getItem">         The get item. </param>
         /// <returns> A list of. </returns>
-        public IList<T> List<T>(string storedProcedure, List<DbParameter> parameters, Func<INullableReader, T> getItem)
+        public IList<T> List<T>(string storedProcedure, List<DbParameter> parameters, Func<IHypersonicDbReader, T> getItem)
         {
             DbService<TConnection, TCommand> dbService = GetDbService();
-            dbService.ConnectionStringName = _key;
 
-            List<T> populateCollection = dbService.PopulateCollection(storedProcedure, parameters, getItem, null);
+            List<T> populateCollection = dbService.PopulateCollection(storedProcedure, parameters, getItem);
             return populateCollection;
         }
 
@@ -665,28 +432,11 @@ namespace Hypersonic.Core
         /// <param name="parameters">      The parameters. </param>
         /// <param name="getItem">         The get item. </param>
         /// <returns> . </returns>
-        public T Single<T>(string storedProcedure, List<DbParameter> parameters, Func<INullableReader, T> getItem)
+        public T Single<T>(string storedProcedure, List<DbParameter> parameters, Func<IHypersonicDbReader, T> getItem)
         {
             DbService<TConnection, TCommand> dbService = GetDbService();
-            dbService.ConnectionStringName = _key;
 
-            T item = dbService.PopulateItem(storedProcedure, parameters, getItem, null);
-            return item;
-        }
-
-        /// <summary> Populates the item. </summary>
-        /// <typeparam name="T"> . </typeparam>
-        /// <param name="storedProcedure"> The stored procedure. </param>
-        /// <param name="parameters">      The parameters. </param>
-        /// <param name="getItem">         The get item. </param>
-        /// <param name="transaction">     The transaction. </param>
-        /// <returns> . </returns>
-        public T Single<T>(string storedProcedure, List<DbParameter> parameters, Func<INullableReader, T> getItem, IDbTransaction transaction)
-        {
-            DbService<TConnection, TCommand> dbService = GetDbService();
-            dbService.ConnectionStringName = _key;
-
-            T item = dbService.PopulateItem(storedProcedure, parameters, getItem, transaction);
+            T item = dbService.PopulateItem(storedProcedure, parameters, getItem);
             return item;
         }
 
@@ -696,36 +446,11 @@ namespace Hypersonic.Core
         /// <param name="storedProcedure"> The stored procedure. </param>
         /// <param name="parameters">      The parameters. </param>
         /// <param name="getItem">         The get item. </param>
-        /// <param name="transaction">     The transaction. </param>
         /// <returns> . </returns>
-        public T Single<T, TN>(string storedProcedure, TN parameters, Func<INullableReader, T> getItem, IDbTransaction transaction) where TN : class
+        public T Single<T, TN>(string storedProcedure, TN parameters, Func<IHypersonicDbReader, T> getItem) where TN : class
         {
             List<DbParameter> dbParameters = GetValuesFromType(parameters);
-            return Single(storedProcedure, dbParameters, getItem, transaction);
-        }
-
-        /// <summary> Singles. </summary>
-        /// <typeparam name="T">  Generic type parameter. </typeparam>
-        /// <typeparam name="TN"> Type of the tn. </typeparam>
-        /// <param name="storedProcedure"> The stored procedure. </param>
-        /// <param name="parameters">      The parameters. </param>
-        /// <param name="getItem">         The get item. </param>
-        /// <returns> . </returns>
-        public T Single<T, TN>(string storedProcedure, TN parameters, Func<INullableReader, T> getItem) where TN : class
-        {
-            List<DbParameter> dbParameters = GetValuesFromType(parameters);
-            return Single(storedProcedure, dbParameters, getItem, null);
-        }
-
-        /// <summary> Populates the item. </summary>
-        /// <typeparam name="T"> . </typeparam>
-        /// <param name="storedProcedure"> The stored procedure. </param>
-        /// <param name="getItem">         The get item. </param>
-        /// <param name="transaction">     The transaction. </param>
-        /// <returns> . </returns>
-        public T Single<T>(string storedProcedure, Func<INullableReader, T> getItem, IDbTransaction transaction)
-        {
-            return Single(storedProcedure, new List<DbParameter>(), getItem, transaction);
+            return Single(storedProcedure, dbParameters, getItem);
         }
 
         /// <summary> Populates the item. </summary>
@@ -733,9 +458,9 @@ namespace Hypersonic.Core
         /// <param name="storedProcedure"> The stored procedure. </param>
         /// <param name="getItem">         The get item. </param>
         /// <returns> . </returns>
-        public T Single<T>(string storedProcedure, Func<INullableReader, T> getItem)
+        public T Single<T>(string storedProcedure, Func<IHypersonicDbReader, T> getItem)
         {
-            return Single(storedProcedure, new List<DbParameter>(), getItem, null);
+            return Single(storedProcedure, new List<DbParameter>(), getItem);
         }
 
         /// <summary> Converts an entity to the parameters. </summary>

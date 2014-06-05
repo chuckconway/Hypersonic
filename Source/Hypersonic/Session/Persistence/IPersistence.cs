@@ -28,8 +28,21 @@ namespace Hypersonic.Session.Persistence
         /// <returns> . </returns>
         List<Persist> Persist(ICollection collection);
 
+        /// <summary>
+        /// Persists the specified collection.
+        /// </summary>
+        /// <param name="collection">The collection.</param>
+        /// <param name="tableName">Name of the table.</param>
+        /// <returns>List&lt;Persist&gt;.</returns>
         List<Persist> Persist(ICollection collection, string tableName);
 
+        /// <summary>
+        /// Persists the specified item.
+        /// </summary>
+        /// <param name="item">The item.</param>
+        /// <param name="tablename">The tablename.</param>
+        /// <param name="where">The where.</param>
+        /// <returns>List&lt;Persist&gt;.</returns>
         List<Persist> Persist(object item, string tablename, string @where);
 
         /// <summary> Persists. </summary>

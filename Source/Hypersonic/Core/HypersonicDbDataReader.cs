@@ -1,7 +1,13 @@
 #region Using Directives
 
 using System;
+using System.Collections;
 using System.Data;
+using System.Data.Common;
+using System.IO;
+using System.Runtime.Remoting;
+using System.Threading;
+using System.Threading.Tasks;
 
 #endregion
 
@@ -27,34 +33,24 @@ namespace Hypersonic.Core
     ///    the IDataReader that it wraps.
     /// Author: Steve Michelotti
     /// </summary>
-    public sealed class NullableDataReader : IDataReader, INullableReader
+    public sealed class HypersonicDbDataReader : IHypersonicDbReader
     {
 
-        #region Private Fields
-
-        readonly IDataReader _reader;
+        readonly DbDataReader _reader;
 
         /// <summary>
         /// Delegate to be used for anonymous method delegate inference
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        private delegate T Conversion<T>(int ordinal);
-
-        #endregion
+        private delegate T Conversion<out T>(int ordinal);
 
 
-        #region Constructors
-
-        public NullableDataReader(IDataReader dataReader)
+        public HypersonicDbDataReader(DbDataReader dataReader)
         {
             _reader = dataReader;
         }
 
-        #endregion
-
-
-        #region IDataReader Members
 
         public void Close()
         {
@@ -91,10 +87,6 @@ namespace Hypersonic.Core
             get { return _reader.RecordsAffected; }
         }
 
-        #endregion
-
-
-        #region IDisposable Members
 
         public void Dispose()
         {
@@ -103,11 +95,6 @@ namespace Hypersonic.Core
                 _reader.Dispose();
             }
         }
-
-        #endregion
-
-
-        #region IDataRecord Members
 
         /// <summary>
         /// Gets the number of columns in the current row.
@@ -135,6 +122,145 @@ namespace Hypersonic.Core
         }
 
         /// <summary>
+        /// Gets the enumerator.
+        /// </summary>
+        /// <returns>IEnumerator.</returns>
+        public IEnumerator GetEnumerator()
+        {
+            return _reader.GetEnumerator();
+        }
+
+        /// <summary>
+        /// Gets the database data reader.
+        /// </summary>
+        /// <returns>DbDataReader.</returns>
+        public DbDataReader GetDbDataReader()
+        {
+            return _reader;
+        }
+
+        /// <summary>
+        /// Gets the field value asynchronous.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="ordinal">The ordinal.</param>
+        /// <returns>Task&lt;T&gt;.</returns>
+        public Task<T> GetFieldValueAsync<T>(int ordinal)
+        {
+            return _reader.GetFieldValueAsync<T>(ordinal);
+        }
+
+        /// <summary>
+        /// Determines whether [is database null asynchronous] [the specified ordinal].
+        /// </summary>
+        /// <param name="ordinal">The ordinal.</param>
+        public Task<bool> IsDBNullAsync(int ordinal)
+        {
+           return _reader.IsDBNullAsync(ordinal);
+        }
+
+        /// <summary>
+        /// Nexts the result asynchronous.
+        /// </summary>
+        /// <returns>Task&lt;System.Boolean&gt;.</returns>
+        public Task<bool> NextResultAsync()
+        {
+            return _reader.NextResultAsync();
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether this instance has rows.
+        /// </summary>
+        /// <value><c>true</c> if this instance has rows; otherwise, <c>false</c>.</value>
+        public bool HasRows
+        {
+            get {return _reader.HasRows; }
+        }
+
+        /// <summary>
+        /// Reads the asynchronous.
+        /// </summary>
+        /// <returns>Task&lt;System.Boolean&gt;.</returns>
+        public Task<bool> ReadAsync()
+        {
+            return _reader.ReadAsync();
+        }
+
+        /// <summary>
+        /// Reads the asynchronous.
+        /// </summary>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>Task&lt;System.Boolean&gt;.</returns>
+        public Task<bool> ReadAsync(CancellationToken cancellationToken)
+        {
+            return _reader.ReadAsync(cancellationToken);
+        }
+
+        /// <summary>
+        /// Gets the field value asynchronous.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="ordinal">The ordinal.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>Task&lt;T&gt;.</returns>
+        public Task<T> GetFieldValueAsync<T>(int ordinal, CancellationToken cancellationToken)
+        {
+            return _reader.GetFieldValueAsync<T>(ordinal, cancellationToken);
+        }
+
+        /// <summary>
+        /// Gets the field value.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="ordinal">The ordinal.</param>
+        /// <returns>T.</returns>
+        public T GetFieldValue<T>(int ordinal)
+        {
+            return _reader.GetFieldValue<T>(ordinal);
+        }
+
+        /// <summary>
+        /// Gets the stream.
+        /// </summary>
+        /// <param name="ordinal">The ordinal.</param>
+        /// <returns>Stream.</returns>
+        public Stream GetStream(int ordinal)
+        {
+            return _reader.GetStream(ordinal);
+        }
+
+        /// <summary>
+        /// Gets the text reader.
+        /// </summary>
+        /// <param name="ordinal">The ordinal.</param>
+        /// <returns>TextReader.</returns>
+        public TextReader GetTextReader(int ordinal)
+        {
+            return _reader.GetTextReader(ordinal);
+        }
+
+        /// <summary>
+        /// Gets the provider specific values.
+        /// </summary>
+        /// <param name="values">The values.</param>
+        /// <returns>System.Int32.</returns>
+        public int GetProviderSpecificValues(object[] values)
+        {
+            return _reader.GetProviderSpecificValues(values);
+        }
+
+        /// <summary>
+        /// Creates the object reference.
+        /// </summary>
+        /// <param name="requestedType">Type of the requested.</param>
+        /// <returns>ObjRef.</returns>
+        /// <exception cref="System.NotImplementedException"></exception>
+        public ObjRef CreateObjRef(Type requestedType)
+        {
+            return _reader.CreateObjRef(requestedType);
+        }
+
+        /// <summary>
         /// Gets the boolean.
         /// </summary>
         /// <param name="name">The name.</param>
@@ -143,6 +269,8 @@ namespace Hypersonic.Core
         {
             return GetBoolean(_reader.GetOrdinal(name));
         }
+
+        public int VisibleFieldCount { get; private set; }
 
         /// <summary>
         /// Gets the nullable boolean.
@@ -857,10 +985,6 @@ namespace Hypersonic.Core
             get { return _reader[i]; }
         }
 
-        #endregion
-
-
-        #region Private Methods
 
         /// <summary>
         /// This generic method will be call by every interface method in the class.
@@ -886,8 +1010,6 @@ namespace Hypersonic.Core
             }
             return nullable;
         }
-
-        #endregion
 
     }
 }

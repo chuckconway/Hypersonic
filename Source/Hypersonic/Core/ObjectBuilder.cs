@@ -15,7 +15,7 @@ namespace Hypersonic.Core
         /// <typeparam name="T"></typeparam>
         /// <param name="reader">The reader.</param>
         /// <returns></returns>
-        public T HydrateType<T>(INullableReader reader) where T : class, new()
+        public T HydrateType<T>(IHypersonicDbReader reader) where T : class, new()
         {
             var instance = new T();
             return HydrateType(reader, instance) as T;
@@ -25,7 +25,7 @@ namespace Hypersonic.Core
         /// <param name="reader">   The reader. </param>
         /// <param name="instance"> The instance. </param>
         /// <returns> . </returns>
-        private static object HydrateType(INullableReader reader, object instance)
+        private static object HydrateType(IHypersonicDbReader reader, object instance)
         {
             var flattener = new Flattener();
             var namesAndValues = flattener.GetPropertiesWithDefaultValues(instance);
@@ -38,7 +38,7 @@ namespace Hypersonic.Core
         /// <param name="type">   The type. </param>
         /// <param name="reader"> The reader. </param>
         /// <returns> . </returns>
-        public object HydrateType(Type type, INullableReader reader)
+        public object HydrateType(Type type, IHypersonicDbReader reader)
         {
             var instance = Activator.CreateInstance(type);
             var materialized = HydrateType(reader, instance);
@@ -51,7 +51,7 @@ namespace Hypersonic.Core
         /// <summary> Populates. </summary>
         /// <param name="reader">     The reader. </param>
         /// <param name="properties"> The properties. </param>
-        private static void Populate(INullableReader reader, IEnumerable<Property> properties)
+        private static void Populate(IHypersonicDbReader reader, IEnumerable<Property> properties)
         {
             foreach (var property in properties.Where(p => !p.Instance.IsCollection()))
             {

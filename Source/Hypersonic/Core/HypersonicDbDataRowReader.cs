@@ -12,7 +12,7 @@ namespace Hypersonic.Core
     /// Since it implements INullableRader, it provides methods to read both
     /// non-null and nullable data fields.
     /// </summary>
-    public class NullableDataRowReader : INullableReader
+    public class HypersonicDbDataRowReader
     {
 
         #region Private Fields
@@ -50,15 +50,15 @@ namespace Hypersonic.Core
         #region Constructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="NullableDataRowReader"/> class.
+        /// Initializes a new instance of the <see cref="HypersonicDbDataRowReader"/> class.
         /// </summary>
         /// <param name="dataRow">The data row.</param>
-        public NullableDataRowReader(DataRow dataRow)
+        public HypersonicDbDataRowReader(DataRow dataRow)
         {
             _row = dataRow;
         }
 
-        public NullableDataRowReader()
+        public HypersonicDbDataRowReader()
         {
         }
 

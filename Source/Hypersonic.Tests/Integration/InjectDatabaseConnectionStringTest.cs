@@ -33,7 +33,7 @@ namespace Hypersonic.Tests.Integration
         /// </summary>
         /// <param name="reader">The reader.</param>
         /// <returns></returns>
-        private static int Populate(INullableReader reader)
+        private static int Populate(IHypersonicDbReader reader)
         {
             int userId = reader.GetInt32("UserId");
             return userId;

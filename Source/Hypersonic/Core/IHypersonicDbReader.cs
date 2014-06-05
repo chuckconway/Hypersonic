@@ -1,6 +1,13 @@
 #region Using Directives
 
 using System;
+using System.Collections;
+using System.Data;
+using System.Data.Common;
+using System.IO;
+using System.Runtime.Remoting;
+using System.Threading;
+using System.Threading.Tasks;
 
 #endregion
 
@@ -18,9 +25,44 @@ namespace Hypersonic.Core
     /// two separate methods.
     /// Author: Steve Michelotti
     /// </summary>
-    public interface INullableReader
+    public interface IHypersonicDbReader : IDataReader
     {
+
         #region Interface Methods
+
+        IEnumerator GetEnumerator();
+
+        DbDataReader GetDbDataReader();
+
+        Task<T> GetFieldValueAsync<T>(int ordinal);
+
+        Task<bool> IsDBNullAsync(int ordinal);
+        
+        Task<bool> NextResultAsync();
+
+        bool HasRows { get; }
+
+        Task<bool> ReadAsync();
+
+        Task<bool> ReadAsync(CancellationToken cancellationToken);
+
+        Task<T> GetFieldValueAsync<T>(int ordinal, CancellationToken cancellationToken);
+
+        T GetFieldValue<T>(int ordinal);
+
+        Stream GetStream(int ordinal);
+
+        TextReader GetTextReader(int ordinal);
+
+        int GetProviderSpecificValues(object[] values);
+
+
+        /// <summary>
+        /// Creates the object reference.
+        /// </summary>
+        /// <param name="requestedType">Type of the requested.</param>
+        /// <returns>ObjRef.</returns>
+        ObjRef CreateObjRef(Type requestedType);
 
         /// <summary>
         /// Gets the boolean.
@@ -28,6 +70,12 @@ namespace Hypersonic.Core
         /// <param name="name">The name.</param>
         /// <returns></returns>
         bool GetBoolean(string name);
+
+        /// <summary>
+        /// Gets the visible field count.
+        /// </summary>
+        /// <value>The visible field count.</value>
+        int VisibleFieldCount { get; }
 
         /// <summary>
         /// Gets the nullable boolean.
@@ -206,20 +254,7 @@ namespace Hypersonic.Core
         /// </returns>
         bool IsDBNull(string name);
 
-
-        /// <summary>
-        /// Gets the field count.
-        /// </summary>
-        /// <value>The field count.</value>
-        int FieldCount { get; }
-
         #endregion
 
-        /// <summary>
-        /// Gets the name.
-        /// </summary>
-        /// <param name="index">The index.</param>
-        /// <returns></returns>
-        string GetName(int index);
     }
 }

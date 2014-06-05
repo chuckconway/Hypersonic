@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Data;
 using System.Data.Common;
-using System.Diagnostics;
 
 namespace Hypersonic.Core
 {
@@ -11,31 +9,18 @@ namespace Hypersonic.Core
         where TConnection : DbConnection, new()
         where TCommand : DbCommand, new()
     {
-        private string _key;
-        private readonly string _connectionString;
-        private readonly CommandType _commandType;
+        private readonly HypersonicDbConnection<TConnection> _connection;
+        private readonly HypersonicSettings _settings;
 
         /// <summary>
-        /// Gets or sets the key.
+        /// Initializes a new instance of the <see cref="DbService&lt;TConnection, TCommand&gt;" /> class.
         /// </summary>
-        /// <value>The key.</value>
-        public string ConnectionStringName
+        /// <param name="connection">The connection.</param>
+        /// <param name="settings">The settings.</param>
+        public DbService(HypersonicDbConnection<TConnection> connection, HypersonicSettings settings)
         {
-            get { return _key; }
-            set { _key = value; }
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="DbService&lt;TConnection, TCommand&gt;"/> class.
-        /// </summary>
-        /// <param name="connectionName">Name of the connection.</param>
-        /// <param name="connectionString">The connection string.</param>
-        /// <param name="commandType">Type of the command.</param>
-        public DbService(string connectionName, string connectionString, CommandType commandType)
-        {
-            _key = connectionName;
-            _connectionString = connectionString;
-            _commandType = commandType;
+            _connection = connection;
+            _settings = settings;
         }
 
         /// <summary>
@@ -44,54 +29,51 @@ namespace Hypersonic.Core
         /// <typeparam name="T"></typeparam>
         /// <param name="cmdText">The CMD text.</param>
         /// <param name="parms">The parms.</param>
-        /// <param name="transaction">The transaction.</param>
-        /// <returns></returns>
-        public T Scalar<T>(string cmdText, List<DbParameter> parms, IDbTransaction transaction)
+        /// <returns>T.</returns>
+        public T Scalar<T>(string cmdText, List<DbParameter> parms)
         {
-            T result = default(T);
+            var result = default(T);
 
-            using (DbCommand command = GetCommand(cmdText, parms, transaction))
+            using (DbCommand command = GetCommand(cmdText, parms))
             {
-                ExecuteCommand executeCommand = new ExecuteCommand();
-                result = (transaction != null ? executeCommand.ExecuteScalarInTransaction(command, result) : executeCommand.ExecuteScalar(command, result)); 
+                var executeCommand = new ExecuteCommand();
+                result = executeCommand.ExecuteScalar(command, result); 
             }
 
             return result;
         }
-        
+
 
         /// <summary>
         /// Returns reader from database call. **!# MUST be CLOSED and DISPOSED! Suggest using a "using" block
         /// </summary>
         /// <param name="storedProcedure">Procedure to be executed</param>
         /// <param name="values">values to be passed into procedure</param>
-        /// <param name="transaction">The transaction.</param>
         /// <returns>Result Set from procedure execution</returns>
-        public DbDataReader Reader(string storedProcedure, List<DbParameter> values, IDbTransaction transaction)
+        public DbDataReader Reader(string storedProcedure, List<DbParameter> values)
         {
             DbDataReader reader;
 
-            using (DbCommand command = GetCommand(storedProcedure, values, transaction))
+            using (DbCommand command = GetCommand(storedProcedure, values))
             {
-                ExecuteCommand executeCommand = new ExecuteCommand();
-                reader = (transaction != null ? executeCommand.ExecuteReaderInTransaction(command) : executeCommand.ExecuteReader(command));
+                var executeCommand = new ExecuteCommand();
+                reader = executeCommand.ExecuteReader(command);
             }
 
             return reader;
         }
 
-        
+
         /// <summary>
         /// Nullables the reader.
         /// </summary>
         /// <param name="storedProcedure">The stored procedure.</param>
         /// <param name="values">The values.</param>
-        /// <param name="transaction">The transaction.</param>
-        /// <returns></returns>
-        public NullableDataReader NullableReader(string storedProcedure, List<DbParameter> values, IDbTransaction transaction)
+        /// <returns>NullableDataReader.</returns>
+        public HypersonicDbDataReader NullableReader(string storedProcedure, List<DbParameter> values)
         {
-            DbDataReader reader = Reader(storedProcedure, values, transaction);
-            NullableDataReader nullableDataReader = new NullableDataReader(reader);
+            DbDataReader reader = Reader(storedProcedure, values);
+            var nullableDataReader = new HypersonicDbDataReader(reader);
             return nullableDataReader;
         }
 
@@ -100,17 +82,16 @@ namespace Hypersonic.Core
         /// </summary>
         /// <param name="storedProc">name of the stored procedure to be executed</param>
         /// <param name="values">The values.</param>
-        /// <param name="transaction">The transaction.</param>
         /// <returns>rows affected</returns>
-        public int NonQuery(string storedProc, List<DbParameter> values, IDbTransaction transaction)
+        public int NonQuery(string storedProc, List<DbParameter> values)
         {
             int returnValue;
 
             //Get command
-            using (DbCommand command = GetCommand(storedProc, values, transaction))
+            using (DbCommand command = GetCommand(storedProc, values))
             {
-                ExecuteCommand executeCommand = new ExecuteCommand();
-                returnValue = (transaction != null ? executeCommand.ExecuteNonQueryInTransaction(command) : executeCommand.ExecuteNonQuery(command));
+                var executeCommand = new ExecuteCommand();
+                returnValue = executeCommand.ExecuteNonQuery(command);
             }
 
             return returnValue;
@@ -123,12 +104,11 @@ namespace Hypersonic.Core
         /// <param name="storedProcedure">The stored procedure.</param>
         /// <param name="parameters">The parameters.</param>
         /// <param name="getItem">The get item.</param>
-        /// <param name="transaction">The transaction.</param>
-        /// <returns></returns>
-        public List<T> PopulateCollection<T>(string storedProcedure, List<DbParameter> parameters, Func<INullableReader, T> getItem, IDbTransaction transaction)
+        /// <returns>List&lt;T&gt;.</returns>
+        public List<T> PopulateCollection<T>(string storedProcedure, List<DbParameter> parameters, Func<IHypersonicDbReader, T> getItem)
         {
-            NullableDataReader reader = NullableReader(storedProcedure, parameters, transaction);
-            List<T> lineitems = new List<T>();
+            HypersonicDbDataReader reader = NullableReader(storedProcedure, parameters);
+            var lineitems = new List<T>();
 
             using (reader)
             {
@@ -149,12 +129,11 @@ namespace Hypersonic.Core
         /// <param name="storedProcedure">The stored procedure.</param>
         /// <param name="parameters">The parameters.</param>
         /// <param name="getItem">The get item.</param>
-        /// <param name="transaction">The transaction.</param>
-        /// <returns></returns>
-        public T PopulateItem<T>(string storedProcedure, List<DbParameter> parameters, Func<INullableReader, T> getItem, IDbTransaction transaction)
+        /// <returns>T.</returns>
+        public T PopulateItem<T>(string storedProcedure, List<DbParameter> parameters, Func<IHypersonicDbReader, T> getItem)
         {
-            NullableDataReader reader = NullableReader(storedProcedure, parameters, transaction);
-            T lineitem = default(T);
+            var reader = NullableReader(storedProcedure, parameters);
+            var lineitem = default(T);
 
             using (reader)
             {
@@ -172,13 +151,10 @@ namespace Hypersonic.Core
         /// </summary>
         /// <param name="commandText">Inline Sql or stored procedure name</param>
         /// <param name="parameters">parameters to be passed into procedure call</param>
-        /// <param name="transaction">The transaction.</param>
-        /// <returns>
-        /// A SqlCommand with associated commandText and SqlParameters
-        /// </returns>
-        private DbCommand GetCommand(string commandText, List<DbParameter> parameters, IDbTransaction transaction)
+        /// <returns>A SqlCommand with associated commandText and SqlParameters</returns>
+        private DbCommand GetCommand(string commandText, List<DbParameter> parameters)
         {
-            DbCommand cmd = GetCommand(commandText, transaction);
+            DbCommand cmd = GetCommand(commandText);
             cmd.Parameters.AddRange(parameters.ToArray());
 
             return cmd;
@@ -188,83 +164,16 @@ namespace Hypersonic.Core
         /// Creates the SqlCommand and sets the command Text
         /// </summary>
         /// <param name="commandText">Inline Sql or stored procedure name</param>
-        /// <param name="transaction">The transaction.</param>
         /// <returns>A SqlCommand with associated commandText</returns>
-        private DbCommand GetCommand(string commandText, IDbTransaction transaction)
+        private DbCommand GetCommand(string commandText)
         {
-            string key = _key;
-            DbConnection connection = (transaction == null ? GetConnection(key, _connectionString) : (DbConnection)transaction.Connection);
-
             DbCommand cmd = new TCommand
                                 {
-                                    CommandType = _commandType,
+                                    CommandType = (_settings.CommandType == HypersonicCommandType.StoredProcedures ? CommandType.StoredProcedure : CommandType.Text),
                                     CommandText = commandText,
-                                    Connection = connection
+                                    Connection = _connection.DbConnection
                                 };
             return cmd;
-        }
-
-        /// <summary>
-        /// Gets first connection in the connection section of the blog file.
-        /// </summary>
-        /// <returns>A non opened SqlConnection</returns>
-        public DbConnection GetConnection(string key, string connectionString)
-        {
-            connectionString = connectionString ?? string.Empty;
-
-            if (string.IsNullOrEmpty(connectionString))
-            {
-                connectionString = GetConnectionString(key);
-                //connectionString = new ConnectionString(cn);
-            }
-
-            DbConnection connection = new TConnection { ConnectionString = connectionString };
-            
-            return connection;
-        }
-
-        /// <summary>
-        /// Gets the connection string.
-        /// </summary>
-        /// <param name="key">The key.</param>
-        /// <returns></returns>
-        private static string GetConnectionString(string key)
-        {
-            ConnectionStringSettings settings = GetSettings(key);
-
-            if (settings == null)
-            {
-                throw new Exception("Connection string is not set. <clear /> and set the first connection string in the connectionString section in the config OR provide a connection string name.");
-            }
-
-            string connectionString = settings.ConnectionString;
-            return connectionString;
-        }
-
-        /// <summary>
-        /// Gets the settings.
-        /// </summary>
-        /// <param name="key">The key.</param>
-        /// <returns></returns>
-        private static ConnectionStringSettings GetSettings(string key)
-        {
-            ConnectionStringSettings settings = null;
-            const int zero = 0;
-
-            if (string.IsNullOrEmpty(key))
-            {
-                if (ConfigurationManager.ConnectionStrings.Count > zero)
-                {
-                    settings = ConfigurationManager.ConnectionStrings[zero];
-                }
-            }
-            else
-            {
-
-                settings = ConfigurationManager.ConnectionStrings[key];
-            }
-
-            return settings;
         }
     }
 }

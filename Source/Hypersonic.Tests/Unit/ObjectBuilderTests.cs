@@ -13,7 +13,7 @@ namespace Hypersonic.Tests.Unit
         [Test]
         public void ObjectBuilder_SingleLevel_ObjectSuccessfullyPopulated()
         {
-            INullableReader reader = A.Fake<INullableReader>();
+            IHypersonicDbReader reader = A.Fake<IHypersonicDbReader>();
             Fixture fixture = new Fixture();
             Guid test = fixture.CreateAnonymous<Guid>();
 
@@ -35,7 +35,7 @@ namespace Hypersonic.Tests.Unit
         [Test]
         public void ObjectBuilder_NullableInt_ValueOfOneIsSetToNullableType()
         {
-            INullableReader reader = A.Fake<INullableReader>();
+            IHypersonicDbReader reader = A.Fake<IHypersonicDbReader>();
 
             int test = 1;
             Console.WriteLine("Test Value: {0}", test);
@@ -52,7 +52,7 @@ namespace Hypersonic.Tests.Unit
         [Test]
         public void ObjectBuilder_NullableInt_ValueOfNullIsSetToNullableType()
         {
-            INullableReader reader = A.Fake<INullableReader>();
+            IHypersonicDbReader reader = A.Fake<IHypersonicDbReader>();
 
             int? test = null;
             Console.WriteLine("Test Value: {0}", test);
@@ -74,7 +74,7 @@ namespace Hypersonic.Tests.Unit
         [Test]
         public void ObjectBuilder_NullableGuid_ValueOfGuidIsSetToNullableType()
         {
-            INullableReader reader = A.Fake<INullableReader>();
+            IHypersonicDbReader reader = A.Fake<IHypersonicDbReader>();
 
             Guid test = Guid.NewGuid();
             Console.WriteLine("Test Value: {0}", test);
@@ -91,7 +91,7 @@ namespace Hypersonic.Tests.Unit
         [Test]
         public void ObjectBuilder_NullableGuid_ValueOfNullIsSetToNullableType()
         {
-            INullableReader reader = A.Fake<INullableReader>();
+            IHypersonicDbReader reader = A.Fake<IHypersonicDbReader>();
 
             Guid? test = null;
             Console.WriteLine("Test Value: {0}", test);
@@ -113,7 +113,7 @@ namespace Hypersonic.Tests.Unit
         [Test]
         public void ObjectBuilder_Enums_EnumValuesWithIntsHaveThereValuesSet()
         {
-            INullableReader reader = A.Fake<INullableReader>();
+            IHypersonicDbReader reader = A.Fake<IHypersonicDbReader>();
             const string test = "Val1";
             Console.WriteLine("Test Value: {0}", test);
 
@@ -129,7 +129,7 @@ namespace Hypersonic.Tests.Unit
         [Test]
         public void ObjectBuilder_SecondLevel_ValuesAreCastedAndPropertiesArePopulated()
         {
-            INullableReader reader = A.Fake<INullableReader>();
+            IHypersonicDbReader reader = A.Fake<IHypersonicDbReader>();
             Guid val = Guid.NewGuid();
             Console.WriteLine("Test Value: {0}", val);
 
@@ -167,7 +167,7 @@ namespace Hypersonic.Tests.Unit
         [Test]
         public void ObjectBuilder_PrivateProperties_PrivatePropertiesAreNotSet()
         {
-            INullableReader reader = A.Fake<INullableReader>();
+            IHypersonicDbReader reader = A.Fake<IHypersonicDbReader>();
             string val = Guid.NewGuid().ToString();
             Console.WriteLine("Test Value: {0}", val);
 
@@ -191,7 +191,7 @@ namespace Hypersonic.Tests.Unit
         [Test]
         public void ObjectBuilder_CollectionsProperties_CollectionsAreNotSet()
         {
-            INullableReader reader = A.Fake<INullableReader>();
+            IHypersonicDbReader reader = A.Fake<IHypersonicDbReader>();
             string val = Guid.NewGuid().ToString();
             Console.WriteLine("Test Value: {0}", val);
 

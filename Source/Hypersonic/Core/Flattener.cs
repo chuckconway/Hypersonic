@@ -1,11 +1,8 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.IO;
 using System.Linq;
 using System.Data;
-using System.Text;
 using Hypersonic.Attributes;
 using Hypersonic.Core.Extensions;
 
@@ -13,6 +10,17 @@ namespace Hypersonic.Core
 {
     internal class Flattener
     {
+        private readonly HypersonicSettings _settings;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Flattener"/> class.
+        /// </summary>
+        /// <param name="settings">The settings.</param>
+        public Flattener(HypersonicSettings settings)
+        {
+            _settings = settings;
+        }
+
         /// <summary> Columns the names from property names. </summary>
         /// <param name="entity"> The instance. </param>
         /// <returns> . </returns>

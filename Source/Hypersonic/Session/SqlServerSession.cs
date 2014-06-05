@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq.Expressions;
 using System.Text;
+using Hypersonic.Core;
 using Hypersonic.Session.Persistence;
 using Hypersonic.Session.Query;
 
@@ -21,7 +22,8 @@ namespace Hypersonic.Session
         /// <summary>
         /// Constructor.
         /// </summary>
-        public SqlServerSession() : this(new MsSqlDatabase(), new QueryWriter(), new Persistence.Persistence()) { }
+        /// <param name="settings">The settings.</param>
+        public SqlServerSession(HypersonicSettings settings) : this(new MsSqlDatabase(settings), new QueryWriter(), new Persistence.Persistence()) { }
 
         /// <summary>
         /// Constructor.
@@ -184,7 +186,7 @@ namespace Hypersonic.Session
         public void SaveAnonymous(object item, string tableName, string @where)
         {
             var persist = _persistence.Persist(item, tableName, @where);
-            string sql = Intercept(persist);
+            var sql = Intercept(persist);
             NonQuery(sql);
         }
 
@@ -196,7 +198,7 @@ namespace Hypersonic.Session
         {
             var persist = _persistence.Persist<T>(item);
 
-            string sql = Intercept(persist);
+            var sql = Intercept(persist);
             NonQuery(sql);
 
             return item;
@@ -213,7 +215,7 @@ namespace Hypersonic.Session
         {
             var persist = _persistence.Persist(item, tableName);
 
-            string sql = Intercept(persist);
+            var sql = Intercept(persist);
             NonQuery(sql);
 
             return item;
@@ -225,7 +227,7 @@ namespace Hypersonic.Session
         {
             var persist = _persistence.Persist(collection);
 
-            string sql = Intercept(persist);
+            var sql = Intercept(persist);
             NonQuery(sql);
         }
 
@@ -260,7 +262,7 @@ namespace Hypersonic.Session
         /// <returns> . </returns>
         public IQuery<T> Query<T>() where T : class, new()
         {
-            T instance = new T();
+            var instance = new T();
             string[] columns = _queryWriter.GetColumns(instance);
             return new Query<T>(instance.GetType().Name, columns, Database, _queryWriter, _transaction);
         }
@@ -270,7 +272,7 @@ namespace Hypersonic.Session
         /// <returns> . </returns>
         public IQuery<T> Query<T>(string[] columns) where T : class, new()
         {
-            T instance = new T();
+            var instance = new T();
             return new Query<T>(instance.GetType().Name, columns, Database, _queryWriter, _transaction);
         }
 
@@ -280,8 +282,8 @@ namespace Hypersonic.Session
         /// <returns> . </returns>
         public IQuery<TReturn> Query<TReturn, TTable>() where TReturn : class, new() where TTable : new()
         {
-            TTable instance = new TTable();
-            TReturn outInstance = new TReturn();
+            var instance = new TTable();
+            var outInstance = new TReturn();
             return new Query<TReturn>(instance.GetType().Name, _queryWriter.GetColumns(outInstance), Database, _queryWriter, _transaction);
         }
 
@@ -290,7 +292,7 @@ namespace Hypersonic.Session
         /// <returns> . </returns>
         public IQuery<TReturn> Query<TReturn>(string tableName) where TReturn : class, new()
         {
-            TReturn outInstance = new TReturn();
+            var outInstance = new TReturn();
             return new Query<TReturn>(tableName, _queryWriter.GetColumns(outInstance), Database, _queryWriter, _transaction);
         }
 
@@ -314,7 +316,7 @@ namespace Hypersonic.Session
         /// <returns> . </returns>
         public IQuery<T> Query<T>(object columns) where T : class, new()
         {
-            T instance = new T();
+            var instance = new T();
             string[] cols = _queryWriter.GetColumns(columns);
             return new Query<T>(instance.GetType().Name, cols, Database, _queryWriter, _transaction);
         }
