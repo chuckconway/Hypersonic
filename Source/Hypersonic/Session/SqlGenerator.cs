@@ -50,7 +50,7 @@ namespace Hypersonic.Session
         /// <returns> . </returns>
         public string Insert(string typeName, IEnumerable<Property> nameValues)
         {
-            QuotifyValues quotify = new QuotifyValues();
+            var quotify = new QuotifyValues();
             nameValues = nameValues.Where(s => ShowColumn<int>(s.PropertyDescriptor.PropertyType, s.Value)).Where(s => ShowColumn<Guid>(s.PropertyDescriptor.PropertyType, s.Value));
 
             string[] columns = nameValues.Select(p => string.Format("[{0}]", p.Name)).ToArray();

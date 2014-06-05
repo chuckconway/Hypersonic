@@ -104,9 +104,9 @@ namespace Hypersonic.Session.Persistance
         /// <returns> The sql. </returns>
         private static string GenerateSql(object item, string name)
         {
-            IKeysDefined[] keysDefineds = new IKeysDefined[] {new HasPrimaryKeys(), new PrimaryKeysNotDefined()};
+            IKeysDefined[] keysDefineds = {new HasPrimaryKeys(), new PrimaryKeysNotDefined()};
 
-            Flattener flattener = new Flattener();
+            var flattener = new Flattener();
             var primaryKeys = flattener.GetPropertiesWithDefaultValues<PrimaryKeyAttribute>(item).ToList();
             var properties = flattener.GetNamesAndValues(item).ToList();
             string nameTable = name ?? item.GetType().Name;
@@ -141,7 +141,7 @@ namespace Hypersonic.Session.Persistance
         {
             string sql = GenerateUpdate(item, tablename, @where);
 
-            Persist persist = new Persist(sql, item, tablename);
+            var persist = new Persist(sql, item, tablename);
             return new List<Persist> { persist };
         }
 
@@ -154,7 +154,7 @@ namespace Hypersonic.Session.Persistance
         {
             string sql = GenerateUpdate(item, tablename, @where);
 
-            Persist persist = new Persist(sql, item, tablename);
+            var persist = new Persist(sql, item, tablename);
             return new List<Persist> { persist };
         }
 

@@ -107,11 +107,11 @@
     <Compile Include="NullableDataReader.cs" />
     <Compile Include="NullableDataRowReader.cs" />
     <Compile Include="Session\ExpressionProcessor.cs" />
-    <Compile Include="Session\Persistance\HasPrimaryKeys.cs" />
-    <Compile Include="Session\Persistance\IPersistence.cs" />
-    <Compile Include="Session\Persistance\IKeysDefined.cs" />
-    <Compile Include="Session\Persistance\Persist.cs" />
-    <Compile Include="Session\Persistance\PrimaryKeysNotDefined.cs" />
+    <Compile Include="Session\Persistence\HasPrimaryKeys.cs" />
+    <Compile Include="Session\Persistence\IPersistence.cs" />
+    <Compile Include="Session\Persistence\IKeysDefined.cs" />
+    <Compile Include="Session\Persistence\Persist.cs" />
+    <Compile Include="Session\Persistence\PrimaryKeysNotDefined.cs" />
     <Compile Include="Session\Query\Filters\AndFilter.cs" />
     <Compile Include="Session\Query\Filters\Filter.cs" />
     <Compile Include="Session\Query\Filters\IFilter.cs" />

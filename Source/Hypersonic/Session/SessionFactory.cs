@@ -1,6 +1,4 @@
-﻿using System.Diagnostics.Contracts;
-
-namespace Hypersonic.Session
+﻿namespace Hypersonic.Session
 {
     public class SessionFactory
     {
@@ -12,6 +10,5 @@ namespace Hypersonic.Session
         {
             return new SqlServerSession(new MsSqlDatabase(key:key, connectionString:connection));
         }
-
     }
 }

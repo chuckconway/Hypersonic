@@ -1,37 +1,98 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security;
 
 namespace Hypersonic.Session.Query.Expressions
 {
     internal class QuotifyValues
     {
-        public string Quotify(object value)
+
+        /// <summary>
+        /// Checks for SQL injection.
+        /// </summary>
+        /// <param name="userInput">The user input.</param>
+        /// <returns>Boolean.</returns>
+        private static bool CheckForSqlInjection(string userInput)
         {
-            //if the value is null, then set the string value to null, otherwise the value is rendered as an empty string. In some cases that might be intentional. 
-            value = value ?? "null";
-            return QuotifyText(Convert.ToString(value));
+            bool isSqlInjection = false;
+            string[] sqlCheckList = { "--",";--",";","/*", "*/", "@@", "@", "char", "nchar","varchar", "nvarchar", "alter", "begin", "cast", "create", "cursor", "declare",
+                                       "delete", "drop", "end", "exec", "execute", "fetch", "insert", "kill", "select", "sys", "sysobjects", "syscolumns", "table", "update"
+                                       };
+            var checkString = userInput.Replace("'", "''");
+
+            for (var i = 0; i <= sqlCheckList.Length - 1; i++)
+            {
+                if ((checkString.IndexOf(sqlCheckList[i], StringComparison.OrdinalIgnoreCase) >= 0))
+                {
+                    isSqlInjection = true;
+                }
+            }
+
+            return isSqlInjection;
         }
+
+
+        //public string Quotify(object value)
+        //{
+        //    //if the value is null, then set the string value to null, otherwise the value is rendered as an empty string. In some cases that might be intentional. 
+        //    value = value ?? "null";
+        //    return QuotifyText();
+        //}
 
         /// <summary>
         /// Quotifies the text.
         /// </summary>
         /// <param name="val">The val.</param>
         /// <returns></returns>
-        public string QuotifyText(string val)
+        public string Quotify(object val)
         {
-            decimal dec;
-            bool isDecimal = Decimal.TryParse(val, out dec);
+            //if the value is null, then set the string value to null, otherwise the value is rendered as an empty string. In some cases that might be intentional.
+            var stringValue = (val == null ? "null" : Convert.ToString(val));
+
+            var checkForSqlInjection = CheckForSqlInjection(stringValue);
+
+            if (checkForSqlInjection)
+            {
+                throw new SecurityException(string.Format("Potential SQL inject detected. -- {0}", stringValue));
+            }
+
+            var types = NumberTypes();
+            bool isNumber = types.Any(s => s == val.GetType());
 
             //escape single quotes
-           val = val.Replace("'", "''");
+            string escapedValue = stringValue.Replace("'", "''");
 
             //1. numbers are not quoted.
             //2. All byte arrays start with 0x
-            if (!isDecimal && !val.StartsWith("0x"))
+            if (!isNumber && !escapedValue.StartsWith("0x"))
             {
-                val = "'" + val + "'";
+                escapedValue = "'" + escapedValue + "'";
             }
 
-            return val;
+            return escapedValue;
+        }
+
+        private static IEnumerable<Type> NumberTypes()
+        {
+            return new[]
+            {
+                typeof(int),
+                typeof(byte),
+                typeof(sbyte),
+                typeof(sbyte),
+                typeof(decimal),
+                typeof(double),
+                typeof(float),
+                typeof(uint),
+                typeof(long),
+                typeof(uint),
+                typeof(long),
+                typeof(ulong),
+                typeof(short),
+                typeof(ushort)
+
+            };
         }
     }
 }

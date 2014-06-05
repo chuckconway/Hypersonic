@@ -71,10 +71,10 @@ namespace Hypersonic.Session
         /// <returns> instance of type of T. </returns>
         public T Get<T>(Expression<Func<T, bool>> @where) where T : class, new()
         {
-            T instance = new T();
+            var instance = new T();
             var columns = _queryWriter.GetColumns(instance);
 
-            Query<T> query = new Query<T>(instance.GetType().Name, columns, Database, _queryWriter, _transaction);
+            var query = new Query<T>(instance.GetType().Name, columns, Database, _queryWriter, _transaction);
             return query.Where(@where).Single();
         }
 
@@ -96,7 +96,7 @@ namespace Hypersonic.Session
         {
             List<Persist> newPersists = persists.Select(p => PersistIntercept(p, this)).ToList();
 
-            StringBuilder builder = new StringBuilder();
+            var builder = new StringBuilder();
             newPersists.ForEach(p => builder.AppendLine(p.Sql));
 
             return builder.ToString();

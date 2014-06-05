@@ -1,4 +1,5 @@
-﻿using FakeItEasy;
+﻿using System;
+using FakeItEasy;
 using Hypersonic.Session;
 using NUnit.Framework;
 

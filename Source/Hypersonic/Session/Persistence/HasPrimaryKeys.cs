@@ -4,9 +4,10 @@ using System.Linq;
 using Hypersonic.Attributes;
 using Hypersonic.Core;
 using Hypersonic.Core.Extensions;
+using Hypersonic.Session.Persistance;
 using Hypersonic.Session.Query.Expressions;
 
-namespace Hypersonic.Session.Persistance
+namespace Hypersonic.Session.Persistence
 {
     public class HasPrimaryKeys : IKeysDefined
     {
@@ -24,8 +25,8 @@ namespace Hypersonic.Session.Persistance
         /// <returns> The sql. </returns>
         public string GenerateSql(string name, IList<Property> primaryKeys, IList<Property> properties)
         {
-            SqlGenerator generator = new SqlGenerator();
-            PrimaryKeysToSql toSql = new PrimaryKeysToSql();
+            var generator = new SqlGenerator();
+            var toSql = new PrimaryKeysToSql();
 
             bool valuesAreDefault = primaryKeys.Any(p => Convert.ToString(p.Value) == Convert.ToString(GetRuntimeDefaultValue(p.PropertyDescriptor.PropertyType)));
             primaryKeys = CreateNewGuidForGuidPrimaryKeyMarkedWithGuidGeneratorFlag(primaryKeys, properties);
@@ -51,14 +52,14 @@ namespace Hypersonic.Session.Persistance
         {
             var guids = primaryKeys.Where(p => p.PropertyDescriptor.PropertyType == typeof (Guid)).ToList();
 
-            foreach (Property property in guids)
+            foreach (var property in guids)
             {
-                PrimaryKeyAttribute attribute = property.PropertyDescriptor.GetAttribute<PrimaryKeyAttribute>();
+                var attribute = property.PropertyDescriptor.GetAttribute<PrimaryKeyAttribute>();
 
                 if( attribute != null && attribute.Generator == Generator.Guid)
                 {
                     var prop = properties.Single(p => p.Name == property.Name);
-                    Guid newId = Guid.NewGuid();
+                    var newId = Guid.NewGuid();
                     prop.Value = newId;
 
                     prop.PropertyDescriptor.SetValue(prop.Instance, newId);

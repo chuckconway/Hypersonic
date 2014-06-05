@@ -15,7 +15,7 @@ namespace Hypersonic.Session.Query.Expressions
 
         private static string GetValue(MemberExpression node)
         {
-            string val = string.Empty;
+            object val = string.Empty;
 
             if (node.Member is PropertyInfo)
             {
@@ -27,32 +27,30 @@ namespace Hypersonic.Session.Query.Expressions
                 val = GetFieldInfoValue(node);
             }
 
-            QuotifyValues quotify = new QuotifyValues();
+            var quotify = new QuotifyValues();
             return quotify.Quotify(val);
         }
 
         /// <summary> Gets a property information value. </summary>
         /// <param name="node"> The node. </param>
         /// <returns> The property information value. </returns>
-        private static string GetPropertyInfoValue(Expression node)
+        private static object GetPropertyInfoValue(Expression node)
         {
             var valueExpression = Expression.Lambda(node).Compile();
             object value = valueExpression.DynamicInvoke();
-            value = value ?? "null";
 
-            return Convert.ToString(value);
+            return value;
         }
 
         /// <summary> Gets a field information value. </summary>
         /// <param name="node"> The node. </param>
         /// <returns> The field information value. </returns>
-        private static string GetFieldInfoValue(MemberExpression node)
+        private static object GetFieldInfoValue(MemberExpression node)
         {
             object container = ((ConstantExpression)node.Expression).Value;
             object value = ((FieldInfo)node.Member).GetValue(container);
-            value = value ?? "null";
 
-            return Convert.ToString(value);
+            return value;
         }
     }
 }
