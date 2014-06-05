@@ -5,8 +5,8 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq.Expressions;
 using System.Text;
-using System.Text.RegularExpressions;
 using Hypersonic.Session.Persistance;
+using Hypersonic.Session.Persistence;
 using Hypersonic.Session.Query;
 
 namespace Hypersonic.Session
@@ -17,25 +17,12 @@ namespace Hypersonic.Session
         private readonly IPersistence _persistence;
         private ITransaction _transaction;
 
-        private static readonly List<IPersistIntercepter> _intercepters = new List<IPersistIntercepter>();
-
-        public static void AddPersistIntercepter(IPersistIntercepter intercepter)
-        {
-            _intercepters.Add(intercepter);
-        }
-
-        private Persist PersistIntercept(Persist persist, ISession session)
-        {
-            var intercepters = _intercepters.Where(p => p.Condition(persist.TableName));
-            return intercepters.Aggregate(persist, (current, intercepter) => intercepter.Intercept(current, session));
-        }
-
         public IDatabase Database { get; private set; }
 
         /// <summary>   Constructor. </summary>
         ///
         /// <param name="database"> The database. </param>
-        public SqlServerSession(IDatabase database) :  this(database, new QueryWriter(), new Persistence()){}
+        public SqlServerSession(IDatabase database) :  this(database, new QueryWriter(), new Persistence.Persistence()){}
 
         /// <summary> Constructor. </summary>
         /// <param name="database">    The database. </param>

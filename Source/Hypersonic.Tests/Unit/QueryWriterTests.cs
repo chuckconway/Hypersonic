@@ -94,7 +94,7 @@ namespace Hypersonic.Tests.Unit
 
         private static string GetValue(Expression<Func<User, bool>> li)
         {
-            WhereExpressionVisitor expression = new WhereExpressionVisitor();
+            var expression = new WhereExpressionVisitor();
             return expression.Visit(li, new StringBuilder()).ToString();
         }
 

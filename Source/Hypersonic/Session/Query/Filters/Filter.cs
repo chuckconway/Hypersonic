@@ -4,7 +4,7 @@
     {
         protected readonly string _query;
 
-        /// <summary> Specialised constructor for use only by derived classes. </summary>
+        /// <summary> Specialized constructor for use only by derived classes. </summary>
         /// <param name="query"> The query. </param>
         protected Filter(string query)
         {

@@ -3,10 +3,14 @@ using System.Collections;
 using System.Data;
 using System.Linq.Expressions;
 
-namespace Hypersonic
+namespace Hypersonic.Session
 {
     public interface ISession : IDisposable
     {
+        /// <summary>
+        /// Gets the database.
+        /// </summary>
+        /// <value>The database.</value>
         IDatabase Database { get; }
 
         /// <summary> Begins a transaction. </summary>
@@ -50,13 +54,22 @@ namespace Hypersonic
         /// <returns> instance of type of T. </returns>
         T SaveAnonymous<T>(object item, Expression<Func<T, bool>> @where) where T : class, new();
 
-        /// <summary> Saves the item. </summary>
-        /// <typeparam name="T"> Generic type parameter. </typeparam>
-        /// <param name="item">   The name. </param>
-        /// <param name="where"> The where. </param>
-        /// <returns> instance of type of T. </returns>
+        /// <summary>
+        /// Saves the item.
+        /// </summary>
+        /// <typeparam name="T">Generic type parameter.</typeparam>
+        /// <param name="item">The name.</param>
+        /// <param name="tableName">Name of the table.</param>
+        /// <param name="where">The where.</param>
+        /// <returns>instance of type of T.</returns>
         T SaveAnonymous<T>(object item, string tableName, Expression<Func<T, bool>> @where) where T : class, new();
 
+        /// <summary>
+        /// Saves the anonymous.
+        /// </summary>
+        /// <param name="item">The item.</param>
+        /// <param name="tableName">Name of the table.</param>
+        /// <param name="where">The where.</param>
         void SaveAnonymous(object item, string tableName, string @where);
 
 
@@ -77,6 +90,11 @@ namespace Hypersonic
         /// <param name="collection"> The ICollection to save. </param>
         void Save(ICollection collection);
 
+        /// <summary>
+        /// Saves the specified collection.
+        /// </summary>
+        /// <param name="collection">The collection.</param>
+        /// <param name="tableName">Name of the table.</param>
         void Save(ICollection collection, string tableName);
 
         /// <summary> Gets the query. </summary>
@@ -110,6 +128,12 @@ namespace Hypersonic
         /// <returns> . </returns>
         IQuery<T> Query<T>(object columns) where T : class, new();
 
+        /// <summary>
+        /// Queries the specified table name.
+        /// </summary>
+        /// <typeparam name="TReturn">The type of the t return.</typeparam>
+        /// <param name="tableName">Name of the table.</param>
+        /// <returns>IQuery&lt;TReturn&gt;.</returns>
         IQuery<TReturn> Query<TReturn>(string tableName) where TReturn : class, new();
 
     }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Text;
+using Hypersonic.Core;
 using NUnit.Framework;
 using Assert = NUnit.Framework.Assert;
 

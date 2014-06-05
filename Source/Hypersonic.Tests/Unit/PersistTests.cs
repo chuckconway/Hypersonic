@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using Hypersonic.Attributes;
 using Hypersonic.Session.Persistance;
+using Hypersonic.Session.Persistence;
 using Hypersonic.Tests.Integration;
 using NUnit.Framework;
 using NUnitIgnore = NUnit.Framework.IgnoreAttribute;

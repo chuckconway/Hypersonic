@@ -5,8 +5,9 @@ using System.Linq;
 using System.Linq.Expressions;
 using Hypersonic.Attributes;
 using Hypersonic.Core;
+using Hypersonic.Session.Persistance;
 
-namespace Hypersonic.Session.Persistance
+namespace Hypersonic.Session.Persistence
 {
     public interface IPersistence
     {

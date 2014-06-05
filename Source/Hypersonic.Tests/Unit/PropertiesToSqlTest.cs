@@ -15,7 +15,7 @@ namespace Hypersonic.Tests.Unit
         [Test]
         public void Sql()
         {
-            PrimaryKeysToSql toSql = new PrimaryKeysToSql();
+            var toSql = new PrimaryKeysToSql();
             string sql = toSql.ConvertToSql(new User {Id = Guid.NewGuid()});
             Console.WriteLine(sql);
 

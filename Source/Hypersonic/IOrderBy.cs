@@ -1,4 +1,6 @@
-﻿namespace Hypersonic
+﻿using Hypersonic.Session;
+
+namespace Hypersonic
 {
     public interface IOrderBy<T> where T : class 
     {

@@ -5,7 +5,7 @@ using System.Data;
 
 #endregion
 
-namespace Hypersonic
+namespace Hypersonic.Core
 {
     /// <summary>
     /// This class allows a DataRow to be read with a datareader-like interface.

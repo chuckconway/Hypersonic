@@ -68,7 +68,7 @@ namespace Hypersonic.Core
         /// <returns> The simple properties. </returns>
         private IEnumerable<Property> GetNamesAndValues(object instance, bool instantiateDefaultValues, string parent, PropertyDescriptorCollection descriptors)
         {
-            List<Property> names = new List<Property>();
+            var names = new List<Property>();
 
             foreach (PropertyDescriptor property in descriptors)
             {

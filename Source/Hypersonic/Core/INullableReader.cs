@@ -4,7 +4,7 @@ using System;
 
 #endregion
 
-namespace Hypersonic
+namespace Hypersonic.Core
 {
     /// <summary>
     /// This interface defines the contract that a class must implement to read

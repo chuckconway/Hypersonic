@@ -5,7 +5,7 @@ using System.Data;
 
 #endregion
 
-namespace Hypersonic
+namespace Hypersonic.Core
 {
     /// <summary>
     /// This class is a DataReader that provides the ability to seamlessly work

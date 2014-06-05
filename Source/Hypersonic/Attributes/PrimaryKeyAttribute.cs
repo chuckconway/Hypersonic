@@ -16,6 +16,7 @@ namespace Hypersonic.Attributes
         public Generator Generator { get; set; }
     }
 
+    [Flags]
     public enum Generator
     {
         Guid,

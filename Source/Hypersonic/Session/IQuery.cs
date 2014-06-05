@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using Hypersonic.Session.Query.Restrictions;
 
-namespace Hypersonic
+namespace Hypersonic.Session
 {
     public interface IQuery<T> where T : class 
     {
