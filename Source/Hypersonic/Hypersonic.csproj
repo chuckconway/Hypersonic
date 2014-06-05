@@ -95,10 +95,11 @@
     <Compile Include="Core\Exceptions\InvalidTypeException.cs" />
     <Compile Include="Core\Extensions\ObjectExtensions.cs" />
     <Compile Include="Core\Extensions\PropertyDescriptorExtensions.cs" />
+    <Compile Include="Core\HypersonicSettings.cs" />
     <Compile Include="Core\Interception\IClassMaterializeInterceptor.cs" />
     <Compile Include="Core\Interception\IClassSaveInterceptor.cs" />
     <Compile Include="Core\Interception\IDataIntercept.cs" />
-    <Compile Include="Core\Interception\IDataSaveInterceptor.cs" />
+    <Compile Include="Core\Interception\IPropertySaveInterceptor.cs" />
     <Compile Include="Core\Interception\IPropertyMaterializeInterceptor.cs" />
     <Compile Include="Core\Property.cs" />
     <Compile Include="IDbContext.cs" />

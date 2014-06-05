@@ -9,6 +9,12 @@ namespace Hypersonic.Session.Query
 {
     public class QueryWriter : IQueryWriter
     {
+        /// <summary>
+        /// Gets the database.
+        /// </summary>
+        /// <value>The database.</value>
+        public IDatabase Database { get; set; }
+
         List<IFilter> _queries = new List<IFilter>();
         List<Order> _orderBys = new List<Order>();  
 
@@ -47,7 +53,7 @@ namespace Hypersonic.Session.Query
         /// <returns> . </returns>
         private string RenderOrderBy()
         {
-            StringBuilder builder = new StringBuilder();
+            var builder = new StringBuilder();
 
             if(_orderBys.Count > 0)
             {
@@ -66,13 +72,13 @@ namespace Hypersonic.Session.Query
         /// <returns> . </returns>
         private string RenderFilter()
         {
-            StringBuilder builder = new StringBuilder();
+            var builder = new StringBuilder();
 
             foreach (var query in _queries)
             {
-                string name = query.GetType().Name.Replace("Filter", string.Empty);
-                string q = query.Query();
-                string val = string.Format("{0} {1} ", name, q);
+                var name = query.GetType().Name.Replace("Filter", string.Empty);
+                var q = query.Query();
+                var val = string.Format("{0} {1} ", name, q);
                 builder.Append(val);
             }
 
@@ -84,29 +90,31 @@ namespace Hypersonic.Session.Query
         /// <returns> The columns. </returns>
         public string[] GetColumns(object instance)
         {
-            Flattener flattener = new Flattener();
+            var flattener = new Flattener();
             return flattener.GetColumnNames(instance).ToArray();
         }
         
         /// <summary> Gets the select. </summary>
         /// <returns> . </returns>
-        public string Query(object instance, string name)
+        public string Query(object instance, string tableName)
         {
-            Flattener flattener = new Flattener();
+            //TODO:Intercept Data in here.
+
+            var flattener = new Flattener();
             string[] columns = flattener.GetColumnNames(instance).ToArray();
             
-            return Query(columns, name);
+            return Query(columns, tableName);
         }
 
         /// <summary> Gets the select. </summary>
         /// <returns> . </returns>
-        public string Query(string[] columns, string name)
+        public string Query(string[] columns, string tableName)
         {
             columns = columns.Select(s => string.Format("[{0}]", s)).ToArray();
 
             string columnList = String.Join(", ", columns);
             string filter = Where();
-            string sql = String.Format("SELECT {0} FROM [{1}] {2}", columnList, name, filter);
+            string sql = String.Format("SELECT {0} FROM [{1}] {2}", columnList, tableName, filter);
 
             return sql;
         }
@@ -116,7 +124,7 @@ namespace Hypersonic.Session.Query
         /// <returns> . </returns>
         public string Query<T>() where T: class, new()
         {
-            T instance = new T();
+            var instance = new T();
             return Query(instance, instance.GetType().Name);
         }
 
@@ -125,7 +133,7 @@ namespace Hypersonic.Session.Query
         /// <returns> . </returns>
         public string Query<T>(string[] columns) where T : class, new()
         {
-            T instance = new T();
+            var instance = new T();
             return Query(columns, instance.GetType().Name);
         }
 
@@ -134,7 +142,7 @@ namespace Hypersonic.Session.Query
         /// <returns> . </returns>
         public string Query<T>(object columns) where T : class, new()
         {
-            T instance = new T();
+            var instance = new T();
             return Query(columns, instance.GetType().Name);
         }
         

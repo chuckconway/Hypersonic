@@ -33,7 +33,7 @@ namespace Hypersonic.Core
             CodeContract.Requires(type != typeof(string), "The type of string is not supported. Strings must be encapsulated in a property.");
             CodeContract.Requires(type != typeof(DataSet), "DataSets are not supported.");
 
-            Flattener flattener = new Flattener();
+            var flattener = new Flattener();
             var values = flattener.GetNamesAndValues(parameters);
 
             List<DbParameter> dbParameter = GetDbParameters(values);
@@ -45,7 +45,7 @@ namespace Hypersonic.Core
         /// <returns> The database parameters. </returns>
         private List<DbParameter> GetDbParameters(IEnumerable<Property> values)
         {
-            MakeParameterService<TParameter> parameters = new MakeParameterService<TParameter>();
+            var parameters = new MakeParameterService<TParameter>();
            return values.Select(v => parameters.MakeParameter(_parameterDelimiter + v.Name, v.Value)).ToList();
         }
 

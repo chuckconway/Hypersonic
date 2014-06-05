@@ -1,4 +1,4 @@
-namespace Hypersonic.Session.Persistance
+namespace Hypersonic.Session.Persistence
 {
     public class Persist
     {

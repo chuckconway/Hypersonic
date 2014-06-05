@@ -23,6 +23,12 @@ namespace Hypersonic
         CommandType CommandType { get; set; }
 
         /// <summary>
+        /// Gets or sets the settings.
+        /// </summary>
+        /// <value>The settings.</value>
+        HypersonicSettings Settings { get; set; }
+
+        /// <summary>
         /// Gets or sets the key.
         /// </summary>
         /// <value>The key.</value>

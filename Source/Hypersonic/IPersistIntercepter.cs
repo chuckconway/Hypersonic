@@ -1,6 +1,7 @@
 ﻿using System;
 using Hypersonic.Session;
 using Hypersonic.Session.Persistance;
+using Hypersonic.Session.Persistence;
 
 namespace Hypersonic
 {

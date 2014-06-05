@@ -8,7 +8,7 @@
         /// <returns> . </returns>
         public static ISession SqlServer(string key = null, string connection = null)
         {
-            return new SqlServerSession(new MsSqlDatabase(key:key, connectionString:connection));
+            return new SqlServerSession();
         }
     }
 }

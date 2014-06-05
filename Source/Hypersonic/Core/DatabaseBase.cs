@@ -15,14 +15,19 @@ namespace Hypersonic.Core
         private string _key;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="DatabaseBase&lt;TConnection, TCommand, TParameter&gt;"/> class.
+        /// Initializes a new instance of the <see cref="DatabaseBase&lt;TConnection, TCommand, TParameter&gt;" /> class.
         /// </summary>
-        /// <param name="connectionName">Name of the connection.</param>
-        /// <param name="connectionString">The connection string.</param>
-        protected DatabaseBase(string connectionName = null, string connectionString = null): this()
+        /// <param name="settings">The settings.</param>
+        protected DatabaseBase(HypersonicSettings settings)
         {
-            _key = connectionName;
-            ConnectionString = connectionString;
+            _key = settings.ConnectionStringName;
+            ConnectionString = settings.ConnectionStringName;
+            CommandType = settings.CommandType == HypersonicCommandType.StoredProcedures
+                ? CommandType.StoredProcedure
+                : CommandType.Text;
+
+            Settings = settings;
+
         }
 
         /// <summary>
@@ -30,16 +35,11 @@ namespace Hypersonic.Core
         /// </summary>
         protected DatabaseBase()
         {
+            Settings = new HypersonicSettings();
             CommandType = CommandType.StoredProcedure;
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="DatabaseBase&lt;TConnection, TCommand, TParameter&gt;"/> class.
-        /// </summary>
-        protected DatabaseBase(CommandType commandType)
-        {
-            CommandType = commandType;
-        }
+        public HypersonicSettings Settings { get; set; }
 
         /// <summary>
         /// Build database parameters based on type
@@ -745,7 +745,7 @@ namespace Hypersonic.Core
         /// <returns> The given data converted to the parameters. </returns>
         public List<DbParameter> ConvertToParameters(object entity)
         {
-            DbParameterBuilder<SqlParameter> parameterBuilder = new DbParameterBuilder<SqlParameter>("@");
+            var parameterBuilder = new DbParameterBuilder<SqlParameter>("@");
             var parameters = parameterBuilder.GetValuesFromType(entity);
 
             var hasDuplicateParameterNames = parameters.GroupBy(i => i.ParameterName).Where(g => g.Count() > 1).Select(g => g.Key).Any();
@@ -766,7 +766,7 @@ namespace Hypersonic.Core
         /// <returns></returns>
         private List<DbParameter> GetValuesFromType<T>(T instance)
         {
-            DbParameterBuilder<TParameter> extractColumnNamesAndValuesService = new DbParameterBuilder<TParameter>(ParameterDelimiter);
+            var extractColumnNamesAndValuesService = new DbParameterBuilder<TParameter>(ParameterDelimiter);
             List<DbParameter> parameters = extractColumnNamesAndValuesService.GetValuesFromType(instance);
             return parameters;
         }

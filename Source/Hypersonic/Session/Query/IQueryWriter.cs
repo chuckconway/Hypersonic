@@ -5,6 +5,13 @@ namespace Hypersonic.Session.Query
 {
     public interface IQueryWriter :  IDisposable 
     {
+
+        /// <summary>
+        /// Gets or sets the database.
+        /// </summary>
+        /// <value>The database.</value>
+        IDatabase Database { get; set; }
+
         /// <summary> Adds a filter to the 'query'. </summary>
         /// <param name="filter">    Type of the filter. </param>
         void AddFilter(IFilter filter);
@@ -20,7 +27,7 @@ namespace Hypersonic.Session.Query
 
         /// <summary> Gets the select. </summary>
         /// <returns> . </returns>
-        string Query(object instance, string name);
+        string Query(object instance, string tableName);
 
         /// <summary> Gets the query. </summary>
         /// <typeparam name="T"> Generic type parameter. </typeparam>
@@ -39,9 +46,9 @@ namespace Hypersonic.Session.Query
 
         /// <summary> Queries. </summary>
         /// <param name="columns"> The columns. </param>
-        /// <param name="name">    The name. </param>
+        /// <param name="tableName">    The name. </param>
         /// <returns> . </returns>
-        string Query(string[] columns, string name);
+        string Query(string[] columns, string tableName);
 
         /// <summary> Gets the columns. </summary>
         /// <param name="instance"> The instance. </param>

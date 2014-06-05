@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq.Expressions;
 using System.Text;
-using Hypersonic.Session.Persistance;
 using Hypersonic.Session.Persistence;
 using Hypersonic.Session.Query;
 
@@ -19,20 +18,24 @@ namespace Hypersonic.Session
 
         public IDatabase Database { get; private set; }
 
-        /// <summary>   Constructor. </summary>
-        ///
-        /// <param name="database"> The database. </param>
-        public SqlServerSession(IDatabase database) :  this(database, new QueryWriter(), new Persistence.Persistence()){}
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        public SqlServerSession() : this(new MsSqlDatabase(), new QueryWriter(), new Persistence.Persistence()) { }
 
-        /// <summary> Constructor. </summary>
-        /// <param name="database">    The database. </param>
-        /// <param name="queryWriter"> The query writer. </param>
-        /// <param name="persistence"> The persistence. </param>
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="database">The database.</param>
+        /// <param name="queryWriter">The query writer.</param>
+        /// <param name="persistence">The persistence.</param>
         public SqlServerSession(IDatabase database, IQueryWriter queryWriter, IPersistence persistence)
         {
             Database = database;
             _queryWriter = queryWriter;
             _persistence = persistence;
+
+            _queryWriter.Database = database;
         }
 
         /// <summary> Begins a transaction. </summary>
@@ -79,6 +82,35 @@ namespace Hypersonic.Session
             return item;
         }
 
+        private static readonly List<IPersistIntercepter> _interceptors = new List<IPersistIntercepter>();
+
+
+        /// <summary>
+        /// Adds the persist interceptor.
+        /// </summary>
+        /// <param name="interceptor">The interceptor.</param>
+        public static void AddPersistInterceptor(IPersistIntercepter interceptor)
+        {
+            _interceptors.Add(interceptor);
+        }
+
+        /// <summary>
+        /// Persists the intercept.
+        /// </summary>
+        /// <param name="persist">The persist.</param>
+        /// <param name="session">The session.</param>
+        /// <returns>Persist.</returns>
+        private Persist PersistIntercept(Persist persist, ISession session)
+        {
+            var intercepters = _interceptors.Where(p => p.Condition(persist.TableName));
+            return intercepters.Aggregate(persist, (current, intercepter) => intercepter.Intercept(current, session));
+        }
+
+        /// <summary>
+        /// Intercepts the specified persists.
+        /// </summary>
+        /// <param name="persists">The persists.</param>
+        /// <returns>System.String.</returns>
         private string Intercept(IEnumerable<Persist> persists)
         {
             List<Persist> newPersists = persists.Select(p => PersistIntercept(p, this)).ToList();
