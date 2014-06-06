@@ -1,6 +1,4 @@
-﻿using System;
-using Hypersonic.Session.Query;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 
 namespace Hypersonic.Tests.Unit
 {

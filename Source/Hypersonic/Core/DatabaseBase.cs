@@ -143,10 +143,10 @@ namespace Hypersonic.Core
         /// <returns>HypersonicDbDataReader.</returns>
         public HypersonicDbDataReader Reader<TN>(string storedProcedureOrRawSql, TN parameters) where TN : class
         {
-            List<DbParameter> dbParameters = GetValuesFromType(parameters);
-            DbService<TConnection, TCommand> dbService = GetDbService();
+            var dbParameters = GetValuesFromType(parameters);
+            var dbService = GetDbService();
 
-            HypersonicDbDataReader hypersonicDbDataReader = dbService.HypersonicReader(storedProcedureOrRawSql, dbParameters);
+            var hypersonicDbDataReader = dbService.HypersonicReader(storedProcedureOrRawSql, dbParameters);
             return hypersonicDbDataReader;
         }
 
@@ -159,9 +159,9 @@ namespace Hypersonic.Core
         /// <returns>HypersonicDbDataReader.</returns>
         public HypersonicDbDataReader Reader(string storedProcedureOrRawSql, List<DbParameter> parameters)
         {
-            DbService<TConnection, TCommand> dbService = GetDbService();
+            var dbService = GetDbService();
 
-            HypersonicDbDataReader hypersonicDbDataReader = dbService.HypersonicReader(storedProcedureOrRawSql, parameters);
+            var hypersonicDbDataReader = dbService.HypersonicReader(storedProcedureOrRawSql, parameters);
             return hypersonicDbDataReader;
         }
 
@@ -183,7 +183,7 @@ namespace Hypersonic.Core
         /// <returns>System.Int32.</returns>
         public int NonQuery(string storedProcedureOrRawSql, List<DbParameter> parameters)
         {
-            DbService<TConnection, TCommand> dbService = GetDbService();
+            var dbService = GetDbService();
             return dbService.NonQuery(storedProcedureOrRawSql, parameters);
         }
 
@@ -196,7 +196,7 @@ namespace Hypersonic.Core
         /// <returns>System.Int32.</returns>
         public int NonQuery<TN>(string storedProcedureOrRawSql, TN parameters) where TN : class
         {
-            List<DbParameter> dbParameters = GetValuesFromType(parameters);
+            var dbParameters = GetValuesFromType(parameters);
             return NonQuery(storedProcedureOrRawSql, dbParameters);
         }
 
@@ -223,7 +223,7 @@ namespace Hypersonic.Core
         /// <returns>Returns a fully populated parameter</returns>
         public DbParameter MakeParameter(string parameterName, DbType dbType, int size, object parmValue)
         {
-            DbParameter parameter = MakeParameter(parameterName, dbType, size, parmValue, ParameterDirection.Input);
+            var parameter = MakeParameter(parameterName, dbType, size, parmValue, ParameterDirection.Input);
             return parameter;
         }
 
@@ -279,7 +279,7 @@ namespace Hypersonic.Core
         private List<DbParameter> GetValuesFromType<T>(T instance)
         {
             var extractColumnNamesAndValuesService = new DbParameterBuilder<TParameter>(ParameterDelimiter, Settings);
-            List<DbParameter> parameters = extractColumnNamesAndValuesService.GetValuesFromType(instance);
+            var parameters = extractColumnNamesAndValuesService.GetValuesFromType(instance);
             return parameters;
         }
     }

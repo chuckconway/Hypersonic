@@ -34,6 +34,7 @@ namespace Hypersonic
         public HypersonicDbConnection<SqlConnection> BeginSession()
         {
             _connection = new HypersonicDbConnection<SqlConnection>(Settings) { IsManual = true };
+            _connection.DbConnection.Open();
             return _connection;
         }
 
@@ -43,6 +44,7 @@ namespace Hypersonic
         public DbContext()
         {
             Database = new MsSqlDatabase();
+            Settings = new HypersonicSettings();
             _connection = new HypersonicDbConnection<SqlConnection>(Settings) { IsManual = false };
         }
 

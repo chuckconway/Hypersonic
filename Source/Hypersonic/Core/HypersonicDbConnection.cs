@@ -15,7 +15,7 @@ namespace Hypersonic.Core
         /// </summary>
         /// <value><c>true</c> if this instance is manual; otherwise, <c>false</c>.</value>
         /// 
-        public bool IsManual { get; set; }
+        public bool IsManual { get; internal set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="HypersonicDbConnection{TConnection}"/> class.

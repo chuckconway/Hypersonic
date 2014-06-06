@@ -49,7 +49,11 @@ namespace Hypersonic.Core
             Debug.WriteLine(string.Format("Connection String: {0}", command.Connection.ConnectionString));
             Debug.WriteLine(string.Format("Procedure/CommandText: {0}", command.CommandText));
             Debug.WriteLine(string.Format("CommandType: {0}", command.CommandType));
-            Debug.WriteLine(string.Format("{0}", GetParameters(command)));
+
+            if (command.Parameters != null && command.Parameters.Count > 0)
+            {
+                Debug.WriteLine(string.Format("{0}", GetParameters(command)));
+            }
         }
 
         /// <summary>

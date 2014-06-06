@@ -15,7 +15,7 @@ namespace Hypersonic.Tests.Unit
             Fixture fixture = new Fixture();
             var user = fixture.CreateAnonymous<SingleLevelClass>();
             var propertyNames = user.GetType().GetProperties().Select(p => "@" + p.Name).ToArray();
-            IDatabase database = new MsSqlDatabase();
+            var database = new MsSqlDatabase();
 
             var parameters = database.ConvertToParameters(user);
             var parameterNames = parameters.Select(d => d.ParameterName).ToArray();
@@ -28,7 +28,7 @@ namespace Hypersonic.Tests.Unit
         public void Parameters_SecondLevelClass_PropertiesAreConvertedToDbParameters()
         {
             Fixture fixture = new Fixture();
-            IDatabase database = new MsSqlDatabase();
+            var database = new MsSqlDatabase();
             var user = fixture.CreateAnonymous<SecondLevelClass>();
             var propertyNames = new[] { "@Id", "@FirstName", "@LastName", "@Email", "@Password", "@CreateTime" };
 
@@ -42,7 +42,7 @@ namespace Hypersonic.Tests.Unit
         [Test]
         public void Parameters_ThirdLevelClass_PropertiesAreConvertedToDbParameters()
         {
-            IDatabase database = new MsSqlDatabase();
+            var database = new MsSqlDatabase();
             Fixture fixture = new Fixture();
             var user = fixture.CreateAnonymous<ThirdLevelClass>();
             var propertyNames = new[] { "@Id", "@FirstName", "@LastName", "@Email", "@Password", "@CreateTime", "@UpdateDatetime" };
@@ -57,7 +57,7 @@ namespace Hypersonic.Tests.Unit
         [Test, ExpectedException(typeof(DuplicateNameException))]
         public void Parameters_DuplicateParameters_AnExceptionIsThrownWhenDuplicateParametersAreFound()
         {
-            IDatabase database = new MsSqlDatabase();
+            var database = new MsSqlDatabase();
             
             Fixture fixture = new Fixture();
             var duplicate = fixture.CreateAnonymous<DuplicateParameters>();
