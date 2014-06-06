@@ -34,25 +34,30 @@ namespace Hypersonic.Core
         {
             var result = default(T);
 
+            IfNotManualOpenConnection(_connection);
+
             using (DbCommand command = GetCommand(cmdText, parms))
             {
                 var executeCommand = new ExecuteCommand();
                 result = executeCommand.ExecuteScalar(command, result); 
             }
 
+            IfNotManualCloseConnection(_connection);
+
             return result;
         }
 
-
         /// <summary>
-        /// Returns reader from database call. **!# MUST be CLOSED and DISPOSED! Suggest using a "using" block
+        /// Get the Hypersonic data reader.
         /// </summary>
-        /// <param name="storedProcedure">Procedure to be executed</param>
-        /// <param name="values">values to be passed into procedure</param>
-        /// <returns>Result Set from procedure execution</returns>
-        public DbDataReader Reader(string storedProcedure, List<DbParameter> values)
+        /// <param name="storedProcedure">The stored procedure.</param>
+        /// <param name="values">The values.</param>
+        /// <returns>HypersonicDbDataReader.</returns>
+        public HypersonicDbDataReader HypersonicReader(string storedProcedure, List<DbParameter> values)
         {
             DbDataReader reader;
+
+            IfNotManualOpenConnection(_connection);
 
             using (DbCommand command = GetCommand(storedProcedure, values))
             {
@@ -60,39 +65,29 @@ namespace Hypersonic.Core
                 reader = executeCommand.ExecuteReader(command);
             }
 
-            return reader;
-        }
-
-
-        /// <summary>
-        /// Nullables the reader.
-        /// </summary>
-        /// <param name="storedProcedure">The stored procedure.</param>
-        /// <param name="values">The values.</param>
-        /// <returns>NullableDataReader.</returns>
-        public HypersonicDbDataReader NullableReader(string storedProcedure, List<DbParameter> values)
-        {
-            DbDataReader reader = Reader(storedProcedure, values);
-            var nullableDataReader = new HypersonicDbDataReader(reader);
-            return nullableDataReader;
+             return new HypersonicDbDataReader(reader);
         }
 
         /// <summary>
         /// Executes the procedure and passes the parameters to the stored procedure
         /// </summary>
-        /// <param name="storedProc">name of the stored procedure to be executed</param>
+        /// <param name="storedProcedureOrRawSql">The stored procedure or raw SQL.</param>
         /// <param name="values">The values.</param>
         /// <returns>rows affected</returns>
-        public int NonQuery(string storedProc, List<DbParameter> values)
+        public int NonQuery(string storedProcedureOrRawSql, List<DbParameter> values)
         {
             int returnValue;
 
+            IfNotManualOpenConnection(_connection);
+
             //Get command
-            using (DbCommand command = GetCommand(storedProc, values))
+            using (DbCommand command = GetCommand(storedProcedureOrRawSql, values))
             {
                 var executeCommand = new ExecuteCommand();
                 returnValue = executeCommand.ExecuteNonQuery(command);
             }
+
+            IfNotManualCloseConnection(_connection);
 
             return returnValue;
         }
@@ -101,13 +96,13 @@ namespace Hypersonic.Core
         /// Populates the collection.
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="storedProcedure">The stored procedure.</param>
+        /// <param name="storedProcedureOrRawSql">The stored procedure or raw SQL.</param>
         /// <param name="parameters">The parameters.</param>
         /// <param name="getItem">The get item.</param>
         /// <returns>List&lt;T&gt;.</returns>
-        public List<T> PopulateCollection<T>(string storedProcedure, List<DbParameter> parameters, Func<IHypersonicDbReader, T> getItem)
+        public List<T> PopulateCollection<T>(string storedProcedureOrRawSql, List<DbParameter> parameters, Func<IHypersonicDbReader, T> getItem)
         {
-            HypersonicDbDataReader reader = NullableReader(storedProcedure, parameters);
+            HypersonicDbDataReader reader = HypersonicReader(storedProcedureOrRawSql, parameters);
             var lineitems = new List<T>();
 
             using (reader)
@@ -118,6 +113,8 @@ namespace Hypersonic.Core
                     lineitems.Add(items);
                 }
             }
+
+            IfNotManualCloseConnection(_connection);
 
             return lineitems;
         }
@@ -132,7 +129,7 @@ namespace Hypersonic.Core
         /// <returns>T.</returns>
         public T PopulateItem<T>(string storedProcedure, List<DbParameter> parameters, Func<IHypersonicDbReader, T> getItem)
         {
-            var reader = NullableReader(storedProcedure, parameters);
+            var reader = HypersonicReader(storedProcedure, parameters);
             var lineitem = default(T);
 
             using (reader)
@@ -142,6 +139,8 @@ namespace Hypersonic.Core
                     lineitem = getItem(reader);
                 }
             }
+
+            IfNotManualCloseConnection(_connection);
 
             return lineitem;
         }
@@ -174,6 +173,30 @@ namespace Hypersonic.Core
                                     Connection = _connection.DbConnection
                                 };
             return cmd;
+        }
+
+        /// <summary>
+        /// Ifs the not manual open connection.
+        /// </summary>
+        /// <param name="connection">The connection.</param>
+        private void IfNotManualOpenConnection(HypersonicDbConnection<TConnection> connection)
+        {
+            if (!connection.IsManual)
+            {
+                connection.DbConnection.Open();
+            }
+        }
+
+        /// <summary>
+        /// Ifs the not manual connection close it.
+        /// </summary>
+        /// <param name="connection">The connection.</param>
+        private void IfNotManualCloseConnection(HypersonicDbConnection<TConnection> connection)
+        {
+            if (!connection.IsManual)
+            {
+                connection.Dispose();
+            }
         }
     }
 }

@@ -15,25 +15,14 @@ namespace Hypersonic.Core
         /// <returns></returns>
         public int ExecuteNonQuery(DbCommand command)
         {
-            int returnValue;
-            using (DbConnection connnection = command.Connection)
-            {
-                connnection.Open();
-                returnValue = ExecuteNonQueryResult(command);
-            }
-            return returnValue;
+          return ExecuteNonQueryResult(command);
         }
 
         /// <summary>
-        /// Executes the non query in transaction.
+        /// Executes the non query result.
         /// </summary>
         /// <param name="command">The command.</param>
-        /// <returns></returns>
-        public int ExecuteNonQueryInTransaction(DbCommand command)
-        {
-            return ExecuteNonQueryResult(command);
-        }
-
+        /// <returns>System.Int32.</returns>
         private static int ExecuteNonQueryResult(DbCommand command)
         {
             GenerateDebugInformation(command);
@@ -70,7 +59,7 @@ namespace Hypersonic.Core
         /// <returns></returns>
         private static string GetParameters(DbCommand command)
         {
-            StringBuilder builder = new StringBuilder();
+            var builder = new StringBuilder();
             builder.AppendLine("[Parameters]");
 
             if (command.Parameters.Count > 0)
@@ -95,12 +84,9 @@ namespace Hypersonic.Core
         /// <returns></returns>
         public T ExecuteScalar<T>(DbCommand command, T result)
         {
-            using (DbConnection connnection = command.Connection)
-            {
-                connnection.Open();
-                GenerateDebugInformation(command);
-                result = ScalarResult(command, result);
-            }
+            GenerateDebugInformation(command);
+            result = ScalarResult(command, result);
+
             return result;
         }
 
@@ -111,10 +97,10 @@ namespace Hypersonic.Core
         /// <returns> . </returns>
         private static T ScalarResult<T>(IDbCommand command, T result)
         {
-            Stopwatch stopwatch = new Stopwatch();
+            var stopwatch = new Stopwatch();
             stopwatch.Start();
 
-            object val = command.ExecuteScalar();
+            var val = command.ExecuteScalar();
 
             stopwatch.Stop();
             Debug.WriteLine("Elapsed Time: {0}ms", stopwatch.ElapsedMilliseconds);
@@ -129,40 +115,15 @@ namespace Hypersonic.Core
         }
 
         /// <summary>
-        /// Executes the scalar in transaction.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="command">The command.</param>
-        /// <param name="result">The result.</param>
-        /// <returns></returns>
-        public T ExecuteScalarInTransaction<T>(DbCommand command, T result)
-        {
-            GenerateDebugInformation(command);
-            result = ScalarResult(command, result);
-            return result;
-        }
-
-        /// <summary>
         /// Executes the reader.
         /// </summary>
         /// <param name="command">The command.</param>
         /// <returns></returns>
         public DbDataReader ExecuteReader(DbCommand command)
         {
-            command.Connection.Open();
             return ExecuteReaderResult(command, CommandBehavior.CloseConnection);
         }
-
-        /// <summary>
-        /// Executes the reader in transaction.
-        /// </summary>
-        /// <param name="command">The command.</param>
-        /// <returns></returns>
-        public DbDataReader ExecuteReaderInTransaction(DbCommand command)
-        {
-            return ExecuteReaderResult(command, CommandBehavior.Default);
-        }
-
+        
         /// <summary> Executes the reader result operation. </summary>
         /// <param name="command">         The command. </param>
         /// <param name="commandBehavior"> The command behavior. </param>
@@ -171,10 +132,10 @@ namespace Hypersonic.Core
         {
             GenerateDebugInformation(command);
 
-            Stopwatch stopwatch = new Stopwatch();
+            var stopwatch = new Stopwatch();
             stopwatch.Start();
 
-            DbDataReader reader = command.ExecuteReader(commandBehavior);
+            var reader = command.ExecuteReader(commandBehavior);
 
             stopwatch.Stop();
             Debug.WriteLine("Elapsed Time: {0}ms", stopwatch.ElapsedMilliseconds);

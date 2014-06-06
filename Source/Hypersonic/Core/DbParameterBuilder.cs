@@ -9,14 +9,16 @@ namespace Hypersonic.Core
     public class DbParameterBuilder<TParameter> where TParameter : DbParameter, new()
     {
         private readonly string _parameterDelimiter;
+        private readonly HypersonicSettings _settings;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DbParameterBuilder&lt;TParameter&gt;"/> class.
         /// </summary>
         /// <param name="parameterDelimiter">The parameter delimiter.</param>
-        public DbParameterBuilder(string parameterDelimiter)
+        public DbParameterBuilder(string parameterDelimiter, HypersonicSettings settings)
         {
             _parameterDelimiter = parameterDelimiter;
+            _settings = settings;
         }
 
         /// <summary>
@@ -33,7 +35,7 @@ namespace Hypersonic.Core
             CodeContract.Requires(type != typeof(string), "The type of string is not supported. Strings must be encapsulated in a property.");
             CodeContract.Requires(type != typeof(DataSet), "DataSets are not supported.");
 
-            var flattener = new Flattener();
+            var flattener = new Flattener(_settings);
             var values = flattener.GetNamesAndValues(parameters);
 
             List<DbParameter> dbParameter = GetDbParameters(values);

@@ -9,6 +9,13 @@ namespace Hypersonic.Core
 {
     public class ObjectBuilder
     {
+        private readonly HypersonicSettings _settings;
+
+        public ObjectBuilder(HypersonicSettings settings)
+        {
+            _settings = settings;
+        }
+
         /// <summary>
         /// Hydrates the type.
         /// </summary>
@@ -25,9 +32,9 @@ namespace Hypersonic.Core
         /// <param name="reader">   The reader. </param>
         /// <param name="instance"> The instance. </param>
         /// <returns> . </returns>
-        private static object HydrateType(IHypersonicDbReader reader, object instance)
+        private object HydrateType(IHypersonicDbReader reader, object instance)
         {
-            var flattener = new Flattener();
+            var flattener = new Flattener(_settings);
             var namesAndValues = flattener.GetPropertiesWithDefaultValues(instance);
 
             Populate(reader, namesAndValues);
@@ -58,7 +65,7 @@ namespace Hypersonic.Core
                 var propertyName = property.Name;
                 try
                 {
-                    object value = reader.GetValue(property.Name);
+                    var value = reader.GetValue(property.Name);
                     value = (value != DBNull.Value ? value : null);
 
                     value = ConvertToProperType(value, property);

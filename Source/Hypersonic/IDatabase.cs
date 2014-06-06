@@ -1,13 +1,29 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using Hypersonic.Core;
 
 namespace Hypersonic
 {
-    public interface IDatabase
+    /// <summary>
+    /// Interface IDatabase
+    /// </summary>
+    /// <typeparam name="TConnection">The type of the t connection.</typeparam>
+    public interface IDatabase<TConnection> where TConnection : DbConnection, new()
     {
+        /// <summary>
+        /// Begins the session and opens the database connection.
+        /// </summary>
+        /// <returns>HypersonicDbConnection&lt;SqlConnection&gt;.</returns>
+        HypersonicDbConnection<TConnection> BeginSession();
+
+        /// <summary>
+        /// Automatics the mapper.
+        /// </summary>
+        /// <typeparam name="TReturn">The type of the t return.</typeparam>
+        /// <param name="reader">The reader.</param>
+        /// <returns>TReturn.</returns>
+        TReturn AutoMapper<TReturn>(IHypersonicDbReader reader) where TReturn : class, new();
 
         /// <summary>
         /// Gets or sets the settings.
@@ -47,36 +63,13 @@ namespace Hypersonic
         /// <returns></returns>
         T Scalar<T>(string cmdText, List<DbParameter> parameters);
 
-        /// <summary>
-        /// Returns reader from database call. **!# MUST be CLOSED and DISPOSED! Suggest using a "using" block
-        /// </summary>
-        /// <param name="storedProcedure">Procedure to be executed</param>
-        /// <returns>Result Set from procedure execution</returns>
-        DbDataReader Reader(string storedProcedure);
 
         /// <summary>
-        /// Returns reader from database call. **!# MUST be CLOSED and DISPOSED! Suggest using a "using" block
-        /// </summary>
-        /// <param name="storedProcedure">Procedure to be executed</param>
-        /// <param name="parameters">The parameters.</param>
-        /// <returns>Result Set from procedure execution</returns>
-        DbDataReader Reader<N>(string storedProcedure, N parameters) where N : class;
-
-        /// <summary>
-        /// Returns reader from database call. **!# MUST be CLOSED and DISPOSED! Suggest using a "using" block
-        /// </summary>
-        /// <param name="storedProcedure">Procedure to be executed</param>
-        /// <param name="parameters">The parameters.</param>
-        /// <returns>Result Set from procedure execution</returns>
-        DbDataReader Reader(string storedProcedure, List<DbParameter> parameters);
-
-        /// <summary>
-        /// Nullables the reader.
+        /// Readers the specified stored procedure.
         /// </summary>
         /// <param name="storedProcedure">The stored procedure.</param>
-        /// <returns></returns>
-        HypersonicDbDataReader NullableReader(string storedProcedure);
-
+        /// <returns>HypersonicDbDataReader.</returns>
+        HypersonicDbDataReader Reader(string storedProcedureOrRawSql);
 
         /// <summary>
         /// Populate and returns the NullableReader.
@@ -84,15 +77,16 @@ namespace Hypersonic
         /// <param name="storedProcedure">The stored procedure.</param>
         /// <param name="parameters">The parameters.</param>
         /// <returns></returns>
-        HypersonicDbDataReader NullableReader<N>(string storedProcedure, N parameters) where N : class;
+        HypersonicDbDataReader Reader<N>(string storedProcedureOrRawSql, N parameters) where N : class;
+
 
         /// <summary>
-        /// Nullables the reader.
+        /// Readers the specified stored procedure.
         /// </summary>
         /// <param name="storedProcedure">The stored procedure.</param>
         /// <param name="parameters">The parameters.</param>
-        /// <returns></returns>
-        HypersonicDbDataReader NullableReader(string storedProcedure, List<DbParameter> parameters);
+        /// <returns>HypersonicDbDataReader.</returns>
+        HypersonicDbDataReader Reader(string storedProcedureOrRawSql, List<DbParameter> parameters);
 
         /// <summary>
         /// Executes the procedure
@@ -107,7 +101,7 @@ namespace Hypersonic
         /// <param name="storedProc">The stored proc.</param>
         /// <param name="parameters">The parameters.</param>
         /// <returns></returns>
-        int NonQuery(string storedProc, List<DbParameter> parameters);
+        int NonQuery(string storedProcedureOrRawSql, List<DbParameter> parameters);
 
         /// <summary>
         /// Executes the procedure and passes the parameters to the stored procedure.
@@ -116,7 +110,7 @@ namespace Hypersonic
         /// <param name="storedProc">The stored proc.</param>
         /// <param name="parameters">The parameters.</param>
         /// <returns></returns>
-        int NonQuery<N>(string storedProc, N parameters) where N : class;
+        int NonQuery<N>(string storedProcedureOrRawSql, N parameters) where N : class;
 
         /// <summary>
         /// Makes the parameter.

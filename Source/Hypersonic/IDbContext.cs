@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.Common;
+using System.Data.SqlClient;
 using Hypersonic.Core;
 
 namespace Hypersonic
@@ -8,53 +9,71 @@ namespace Hypersonic
     public interface IDbContext
     {
         /// <summary>
-        /// Populates the item.
+        /// Begins the session and opens the database connection.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="storedProcedure">The stored procedure.</param>
-        /// <param name="parameters">The parameters.</param>
-        /// <param name="getItem">The get item.</param>
-        /// <returns></returns>
-        T Single<T>(string storedProcedure, List<DbParameter> parameters, Func<IHypersonicDbReader, T> getItem);
+        /// <returns>HypersonicDbConnection&lt;SqlConnection&gt;.</returns>
+        HypersonicDbConnection<SqlConnection> BeginSession();
+
+        /// <summary>
+        /// Gets the database.
+        /// </summary>
+        /// <value>The database.</value>
+        IDatabase<SqlConnection> Database { get; }
+
+        /// <summary>
+        /// Gets the settings.
+        /// </summary>
+        /// <value>The settings.</value>
+        HypersonicSettings Settings { get; }
 
         /// <summary>
         /// Populates the item.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <typeparam name="N"></typeparam>
-        /// <param name="storedProcedure">The stored procedure.</param>
+        /// <typeparam name="TReturn">The type of the t return.</typeparam>
+        /// <param name="storedProcedureOrRawSql">The stored procedure or raw SQL.</param>
         /// <param name="parameters">The parameters.</param>
-        /// <param name="getItem">The get item.</param>
-        /// <returns></returns>
-        T Single<T, N>(string storedProcedure, N parameters, Func<IHypersonicDbReader, T> getItem) where N : class;
+        /// <param name="mapper">The mapper.</param>
+        /// <returns>T.</returns>
+        TReturn Single<TReturn>(string storedProcedureOrRawSql, List<DbParameter> parameters, Func<IHypersonicDbReader, TReturn> mapper);
 
         /// <summary>
         /// Populates the item.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="storedProcedure">The stored procedure.</param>
-        /// <param name="getItem">The get item.</param>
-        /// <returns></returns>
-        T Single<T>(string storedProcedure, Func<IHypersonicDbReader, T> getItem);
+        /// <typeparam name="TParameters">The type of the t parameters.</typeparam>
+        /// <typeparam name="TReturn">The type of the t return.</typeparam>
+        /// <param name="storedProcedureOrRawSql">The stored procedure or raw SQL.</param>
+        /// <param name="parameters">The parameters.</param>
+        /// <param name="mapper">The mapper.</param>
+        /// <returns>T.</returns>
+        TReturn Single<TParameters, TReturn>(string storedProcedureOrRawSql, TParameters parameters, Func<IHypersonicDbReader, TReturn> mapper) where TParameters : class;
+
+        /// <summary>
+        /// Populates the item.
+        /// </summary>
+        /// <typeparam name="TReturn">The type of the t return.</typeparam>
+        /// <param name="storedProcedureOrRawSql">The stored procedure or raw SQL.</param>
+        /// <param name="mapper">The mapper.</param>
+        /// <returns>T.</returns>
+        TReturn Single<TReturn>(string storedProcedureOrRawSql, Func<IHypersonicDbReader, TReturn> mapper);
 
         /// <summary>
         /// Singles the specified stored procedure.
         /// </summary>
         /// <typeparam name="TReturn">The type of the T return.</typeparam>
-        /// <param name="storedProcedure">The stored procedure.</param>
+        /// <param name="storedProcedureOrRawSql">The stored procedure or raw SQL.</param>
         /// <returns>``0.</returns>
-        TReturn Single<TReturn>(string storedProcedure) where TReturn : class, new();
+        TReturn Single<TReturn>(string storedProcedureOrRawSql) where TReturn : class, new();
 
         /// <summary>
         /// Singles the specified stored procedure.
         /// </summary>
+        /// <typeparam name="TParameters">The type of the t parameters.</typeparam>
         /// <typeparam name="TReturn">The type of the t return.</typeparam>
-        /// <typeparam name="TN">The type of the tn.</typeparam>
-        /// <param name="storedProcedure">The stored procedure.</param>
+        /// <param name="storedProcedureOrRawSql">The stored procedure or raw SQL.</param>
         /// <param name="parameters">The parameters.</param>
         /// <returns>TReturn.</returns>
-        TReturn Single<TReturn, TN>(string storedProcedure, TN parameters)
-            where TN : class
+        TReturn Single<TParameters, TReturn>(string storedProcedureOrRawSql, TParameters parameters)
+            where TParameters : class
             where TReturn : class, new();
 
         /// <summary>
@@ -106,8 +125,8 @@ namespace Hypersonic
         /// <typeparam name="T"></typeparam>
         /// <param name="storedProcedureOrRawSql">The stored procedure.</param>
         /// <param name="parameters">The parameters.</param>
-        /// <param name="getItem">The get item.</param>
-        /// <returns></returns>
+        /// <param name="mapper">The mapper.</param>
+        /// <returns>IList&lt;T&gt;.</returns>
         IList<T> List<T>(string storedProcedureOrRawSql, List<DbParameter> parameters, Func<IHypersonicDbReader, T> mapper);
     }
 }

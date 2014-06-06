@@ -10,6 +10,17 @@ namespace Hypersonic.Core
 
         public DbConnection DbConnection { get; private set; }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether this instance is manual.
+        /// </summary>
+        /// <value><c>true</c> if this instance is manual; otherwise, <c>false</c>.</value>
+        /// 
+        public bool IsManual { get; set; }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="HypersonicDbConnection{TConnection}"/> class.
+        /// </summary>
+        /// <param name="settings">The settings.</param>
         public HypersonicDbConnection(HypersonicSettings settings)
         {
             _settings = settings;
